@@ -1,0 +1,8 @@
+# Files
+*.DS_Store
+test_class.py
+extract_text.py
+
+# Folders
+*__pycache__/
+media/

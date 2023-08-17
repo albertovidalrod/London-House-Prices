@@ -1,0 +1,129 @@
+from dataclasses import dataclass, field
+
+from bs4 import BeautifulSoup
+
+
+@dataclass
+class House:
+    id: str = None
+    price: str = None
+    added_reduced: str = None
+    address: str = None
+    description: str = None
+    surface_area: str = None
+    price_change_date: list[str] = field(default_factory=list)
+    price_change_value: list[str] = field(default_factory=list)
+    type_house: str = None
+    bathrooms: str = None
+    bedrooms: str = None
+    tenure: str = None
+    surface_area: str = None
+    key_features: list[str] = field(default_factory=list)
+    close_stations: list[str] = field(default_factory=list)
+    tenure_ground_rent: str = None
+    tenure_annual_service_charge: str = "Ask agent"
+    tenure_lease_length: str = "Ask agent"
+    council_tax_band: str = "Ask agent"
+
+    def scan_house_ad(self, house_ad_html) -> None:
+        house_ad_soup = BeautifulSoup(house_ad_html, "html.parser")
+
+        # Get house id
+        self.id = house_ad_soup.find("div").get("id").split("-")[1]
+        # Get house price
+        self.price = house_ad_soup.find(
+            "div", class_="propertyCard-priceValue"
+        ).get_text()
+        # Get house date when it was added to rightmove or when its price was last
+        # reduced
+        self.added_reduced = house_ad_soup.find(
+            "span", class_="propertyCard-branchSummary-addedOrReduced"
+        ).get_text()
+        # Get house address
+        self.address = house_ad_soup.find("address").get_text()
+        # Get the dates when the price has changed. This information is provided by a
+        # a Chrome extension
+        self.price_change_date = [
+            element.get_text()
+            for element in house_ad_soup.find_all("td", class_="pl-date-column")
+        ]
+        # Get the price change value, if any. This information is provided by a
+        # a Chrome extension
+        self.price_change_value = [
+            element.get_text()
+            for element in house_ad_soup.find_all("td", class_="pl-price-column")
+        ]
+        # Get house description
+        self.description = house_ad_soup.find("span", itemprop="description").get_text()
+
+    def scan_house_page(self, house_page_html):
+        house_soup = BeautifulSoup(house_page_html, "html.parser")
+
+        # Get the type of house, number of bedrooms, number of bathrooms, size of the
+        # house (if the information is available) and the tenure type
+        house_details = [
+            element.get_text()
+            for element in house_soup.find_all("dl", class_="_3gIoc-NFXILAOZEaEjJi1n")
+        ]
+        self.type_house = house_details[0].split("PROPERTY TYPE")[-1]
+        self.bedrooms = house_details[1].split("×")[-1]
+        self.bedrooms = house_details[2].split("×")[-1]
+        if "SIZE" in house_details[3]:
+            self.surface_area = (
+                house_details[3].split("SIZE")[-1].split("(")[-1].split(" ")[0]
+            )
+            self.tenure = house_details[4].split("RE")[-1]
+        else:
+            self.tenure = house_details[3].split("RE")[-1]
+
+        # Get the key features of the house
+        key_features = [
+            element.get_text()
+            for element in house_soup.find_all("li", class_="lIhZ24u1NHMa5Y6gDH90A")
+        ]
+        if key_features:
+            self.key_features = key_features
+
+        # Get information about the closest stations
+        self.close_stations = [
+            element.get_text().split("Station")
+            for element in house_soup.find_all("div", class_="mlEuHXZpfrrzJtwlRmwBe")
+        ]
+
+        # Get the tenure details: ground rent, annual service charge and lease length
+        house_tenure_details = [
+            element.get_text()
+            for element in house_soup.find_all("p", class_="_215KNIlPCd_x8o2is5Adgn")
+        ]
+        if house_tenure_details:
+            self.tenure_ground_rent = house_tenure_details[0]
+            self.tenure_annual_service_charge = house_tenure_details[1]
+            self.tenure_lease_length = house_tenure_details[2]
+
+        # Get the council tax band
+        self.council_tax_band = house_soup.find(
+            "p", class_="_1VOsciKYew6xj3RWxMv_6J"
+        ).get_text()
+
+    def assert_attrs(
+        self,
+        id,
+        price,
+        added_reduced,
+        address,
+        price_change_date,
+        price_change_value,
+        description,
+    ) -> None:
+        if (
+            self.id == id
+            and self.price == price
+            and self.added_reduced == added_reduced
+            and self.address == address
+            and self.price_change_date == price_change_date
+            and self.price_change_value == price_change_value
+            and self.description == description
+        ):
+            print("True")
+        else:
+            print("False")
