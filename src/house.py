@@ -10,17 +10,16 @@ class House:
     added_reduced: str = None
     address: str = None
     description: str = None
-    surface_area: str = None
     price_change_date: list[str] = field(default_factory=list)
     price_change_value: list[str] = field(default_factory=list)
     type_house: str = None
     bathrooms: str = None
     bedrooms: str = None
     tenure: str = None
-    surface_area: str = None
+    size: str = None
     key_features: list[str] = field(default_factory=list)
     close_stations: list[str] = field(default_factory=list)
-    tenure_ground_rent: str = None
+    tenure_ground_rent: str = "Ask agent"
     tenure_annual_service_charge: str = "Ask agent"
     tenure_lease_length: str = "Ask agent"
     council_tax_band: str = "Ask agent"
@@ -65,16 +64,17 @@ class House:
             element.get_text()
             for element in house_soup.find_all("dl", class_="_3gIoc-NFXILAOZEaEjJi1n")
         ]
-        self.type_house = house_details[0].split("PROPERTY TYPE")[-1]
-        self.bedrooms = house_details[1].split("×")[-1]
-        self.bedrooms = house_details[2].split("×")[-1]
-        if "SIZE" in house_details[3]:
-            self.surface_area = (
-                house_details[3].split("SIZE")[-1].split("(")[-1].split(" ")[0]
-            )
-            self.tenure = house_details[4].split("RE")[-1]
-        else:
-            self.tenure = house_details[3].split("RE")[-1]
+        for item in house_details:
+            if "PROPERTY TYPE" in item:
+                self.type_house = item.split("PROPERTY TYPE")[-1]
+            elif "BEDROOMS" in item:
+                self.bedrooms = item.split("×")[-1]
+            elif "BATHROOMS" in item:
+                self.bathrooms = item.split("×")[-1]
+            elif "SIZE" in item:
+                self.size = item.split("SIZE")[-1]
+            elif "TENURE" in item:
+                self.tenure = item.split("RE")[-1]
 
         # Get the key features of the house
         key_features = [
@@ -91,19 +91,22 @@ class House:
         ]
 
         # Get the tenure details: ground rent, annual service charge and lease length
-        house_tenure_details = [
-            element.get_text()
-            for element in house_soup.find_all("p", class_="_215KNIlPCd_x8o2is5Adgn")
-        ]
-        if house_tenure_details:
-            self.tenure_ground_rent = house_tenure_details[0]
-            self.tenure_annual_service_charge = house_tenure_details[1]
-            self.tenure_lease_length = house_tenure_details[2]
+        house_tenure_details_element = house_soup.find_all(
+            "p", class_="_215KNIlPCd_x8o2is5Adgn"
+        )
+        if house_tenure_details_element:
+            house_tenure_details = [
+                element.get_text() for element in house_tenure_details_element
+            ]
+            if house_tenure_details:
+                self.tenure_ground_rent = house_tenure_details[0]
+                self.tenure_annual_service_charge = house_tenure_details[1]
+                self.tenure_lease_length = house_tenure_details[2]
 
         # Get the council tax band
-        self.council_tax_band = house_soup.find(
-            "p", class_="_1VOsciKYew6xj3RWxMv_6J"
-        ).get_text()
+        council_tax_element = house_soup.find("p", class_="_1VOsciKYew6xj3RWxMv_6J")
+        if council_tax_element:
+            self.council_tax_band = council_tax_element.get_text()
 
     def assert_attrs(
         self,

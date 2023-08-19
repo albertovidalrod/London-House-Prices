@@ -35,7 +35,7 @@ class Session:
 
         # Define the wait element to pause the script until an element is found or ready to
         # be clicked
-        self.wait = WebDriverWait(self.driver, 10)
+        self.wait = WebDriverWait(self.driver, 5)
 
         # Find cookie button and accept cookies
         cookie_button_args = (By.ID, "onetrust-accept-btn-handler")
@@ -44,13 +44,12 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(cookie_button_args))
         self.driver.execute_script("arguments[0].click();", cookie_button)
 
-    def set_search_parameters(self):
+    def set_search_parameters(self, postcode, garden_option):
         # Find postcode field and search button
         postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
         search_button = self.driver.find_element(by=By.ID, value="search")
 
         # Fill the postcode
-        postcode = "NW53AF"
         postcode_element.send_keys(postcode)
         # self.wait until the update button is clickable and then click it
         self.wait.until(EC.element_to_be_clickable((By.ID, "search")))
@@ -109,6 +108,16 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(filters_button_args))
         self.driver.execute_script("arguments[0].click();", filters_button)
 
+        # Select Garden as one of the must haves
+        if garden_option.casefold() == "garden".casefold():
+            garden_homes_args = (
+                By.XPATH,
+                """//*[@id="mustHaveDontShow"]/div/div[1]/div[1]/div/div[2]/div[1]""",
+            )
+            garden_homes_option = self.driver.find_element(*garden_homes_args)
+            self.wait.until(EC.element_to_be_clickable(garden_homes_args))
+            self.driver.execute_script("arguments[0].click();", garden_homes_option)
+
         # Remove new homes
         new_homes_args = (
             By.XPATH,
@@ -154,71 +163,80 @@ class Session:
         self.driver.execute_script("arguments[0].click();", close_filter_button)
 
     def save_house_floorplan(self, floorplans_dir, house_id):
-        # Click on the floorplan and download it
-        floorplan_element = self.driver.find_element(
-            By.CSS_SELECTOR, "a.L-Cl2uB-55GVm9PtHfL3"
-        )
-        floorplan_element.click()
-        time.sleep(0.25)
-
-        # Locate the new img element on the new page
-        floorplan_larger_element = self.driver.find_element(
-            By.CSS_SELECTOR, ".react-transform-component img"
-        )
-
-        # Get the src attribute value (new image URL)
-        floorplan_url = floorplan_larger_element.get_attribute("src")
-
-        # Download the new image using requests
-        response = requests.get(floorplan_url)
-
-        # Save the new image to a file
-        with open(f"{floorplans_dir}/{house_id}_floorplan.png", "wb") as f:
-            f.write(response.content)
-
-        # Go back to the property details page
-        self.driver.back()
-
-    def save_house_pictures(self, house_pictures_dir, house_id):
-        # Click on the house pictures
-        house_pictures_element = self.driver.find_element(
-            By.CSS_SELECTOR, "a._345hU7-W8dOLOomnuuoDVx"
-        )
-        house_pictures_element.click()
-        time.sleep(0.25)
-
-        # Find the element that contains all the pictures
-        parent_element = self.driver.find_elements(
-            By.XPATH, """//*[@id="root"]/div/div[2]/div[2]/div"""
-        )
-        # Extract the pictures from the container html element
-        house_larger_pictures_element = parent_element[0].find_elements(
-            By.CLASS_NAME, "_2BEYToQ5mjPuC5vD8izBf0._3A5jUK72scDMjjyquC9HAc"
-        )
-
-        # Create directory to save house pictures
-        house_dir = f"{house_pictures_dir}/{house_id}"
-        os.makedirs(f"{house_dir}", exist_ok=True)
-
-        # Iterate over the picture elements and save them
-        for i, picture_element in enumerate(house_larger_pictures_element[:-2]):
-            # Find the element that contains the url to the picture
-            picture_link_element = picture_element.find_element(
-                By.CSS_SELECTOR,
-                "div._2BEYToQ5mjPuC5vD8izBf0._3A5jUK72scDMjjyquC9HAc img",
+        time.sleep(0.3)
+        try:
+            # Click on the floorplan and download it
+            floorplan_element = self.driver.find_element(
+                By.CSS_SELECTOR, "a.L-Cl2uB-55GVm9PtHfL3"
             )
-            # Extract the url (src) attribute value
-            picture_url = picture_link_element.get_attribute("src")
+            floorplan_element.click()
+            time.sleep(0.5)
+
+            # Locate the new img element on the new page
+            floorplan_larger_element = self.driver.find_element(
+                By.CSS_SELECTOR, ".react-transform-component img"
+            )
+
+            # Get the src attribute value (new image URL)
+            floorplan_url = floorplan_larger_element.get_attribute("src")
 
             # Download the new image using requests
-            response = requests.get(picture_url)
+            response = requests.get(floorplan_url)
 
             # Save the new image to a file
-            with open(f"{house_dir}/{house_id}_picture_{i}.png", "wb") as f:
+            with open(f"{floorplans_dir}/{house_id}_floorplan.png", "wb") as f:
                 f.write(response.content)
 
-        # Go back to the property details page
-        self.driver.back()
+            # Go back to the property details page
+            self.driver.back()
+        except:
+            print("Could not find the floorplan")
+            return
+
+    def save_house_pictures(self, house_pictures_dir, house_id):
+        try:
+            # Click on the house pictures
+            house_pictures_element = self.driver.find_element(
+                By.CSS_SELECTOR, "a._345hU7-W8dOLOomnuuoDVx"
+            )
+            house_pictures_element.click()
+            time.sleep(0.3)
+
+            # Find the element that contains all the pictures
+            parent_element = self.driver.find_elements(
+                By.XPATH, """//*[@id="root"]/div/div[2]/div[2]/div"""
+            )
+            # Extract the pictures from the container html element
+            house_larger_pictures_element = parent_element[0].find_elements(
+                By.CLASS_NAME, "_2BEYToQ5mjPuC5vD8izBf0._3A5jUK72scDMjjyquC9HAc"
+            )
+
+            # Create directory to save house pictures
+            house_dir = f"{house_pictures_dir}/{house_id}"
+            os.makedirs(f"{house_dir}", exist_ok=True)
+
+            # Iterate over the picture elements and save them
+            for i, picture_element in enumerate(house_larger_pictures_element[:-2]):
+                # Find the element that contains the url to the picture
+                picture_link_element = picture_element.find_element(
+                    By.CSS_SELECTOR,
+                    "div._2BEYToQ5mjPuC5vD8izBf0._3A5jUK72scDMjjyquC9HAc img",
+                )
+                # Extract the url (src) attribute value
+                picture_url = picture_link_element.get_attribute("src")
+
+                # Download the new image using requests
+                response = requests.get(picture_url)
+
+                # Save the new image to a file
+                with open(f"{house_dir}/{house_id}_picture_{i}.png", "wb") as f:
+                    f.write(response.content)
+
+            # Go back to the property details page
+            self.driver.back()
+        except:
+            print("Could not find the pictures of the house")
+            return
 
     def add_house(self, house):
         if isinstance(house, House):
@@ -226,18 +244,15 @@ class Session:
         else:
             raise ValueError("Only instances of House can be added to the session")
 
-    def show_houses(self):
-        for house in self.house_list:
-            print(house)
-
-    def generate_dataframe(self):
+    def generate_and_save_dataframe(
+        self, data_dir: str, garden_option: str, postcode: str
+    ) -> None:
         data = {
             "id": [house.id for house in self.house_list],
             "price": [house.price for house in self.house_list],
             "added_reduced": [house.added_reduced for house in self.house_list],
             "address": [house.address for house in self.house_list],
             "description": [house.description for house in self.house_list],
-            "surface_area": [house.surface_area for house in self.house_list],
             "price_change_date": [house.price_change_date for house in self.house_list],
             "price_change_value": [
                 house.price_change_value for house in self.house_list
@@ -245,6 +260,7 @@ class Session:
             "type_house": [house.type_house for house in self.house_list],
             "bathrooms": [house.bathrooms for house in self.house_list],
             "bedrooms": [house.bedrooms for house in self.house_list],
+            "size": [house.size for house in self.house_list],
             "tenure": [house.tenure for house in self.house_list],
             "key_features": [house.key_features for house in self.house_list],
             "close_stations": [house.close_stations for house in self.house_list],
@@ -259,4 +275,14 @@ class Session:
             ],
             "council_tax_band": [house.council_tax_band for house in self.house_list],
         }
+        if garden_option.casefold() == "garden".casefold():
+            garden_save_str = "garden"
+        else:
+            garden_save_str = "garden_and_no_garden"
         self.house_dataframe = pd.DataFrame(data)
+        self.house_dataframe.to_csv(
+            f"{data_dir}/house_data_{garden_save_str}_{postcode}.csv"
+        )
+        self.house_dataframe.to_parquet(
+            f"{data_dir}/house_data_{garden_save_str}_{postcode}.parquet"
+        )

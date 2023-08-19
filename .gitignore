@@ -2,6 +2,7 @@
 *.DS_Store
 test_class.py
 extract_text.py
+test_main.py
 
 # Folders
 *__pycache__/
