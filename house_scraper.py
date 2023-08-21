@@ -13,22 +13,10 @@ from src.session import Session
 from src.house import House
 
 
-def main(postcode, garden_option):
-    # Get the current month and create a folder to save the data
-    current_month = datetime.now().strftime("%B")
-    current_year = datetime.now().year
-    DATE_FOLDER = f"{current_month} {current_year}"
-
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    floorplans_dir = os.path.join(current_dir, "media/floorplans")
-    house_pictures_dir = os.path.join(current_dir, "media/house_pictures")
-    data_dir = os.path.join(current_dir, f"data/{DATE_FOLDER}")
-    os.makedirs(data_dir, exist_ok=True)
-
+def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> None:
     session = Session()
     session.launch_browser_with_extension()
     session.set_search_parameters(postcode, garden_option)
-    # session.driver.implicitly_wait(10)
     time.sleep(0.75)
 
     while True:
@@ -46,44 +34,46 @@ def main(postcode, garden_option):
             # Get the important information from the house ad on the search results page
             house_instance.scan_house_ad(house_ad_html)
 
-            try:
-                # Click on house link
-                house_link_element = session.driver.find_element(
-                    By.XPATH,
-                    f'//*[@id="property-{house_instance.id}"]/div/div/div[4]/div[1]/div[2]/a',
-                )
-                session.driver.execute_script(
-                    "arguments[0].click();", house_link_element
-                )
-
-                # Wait a bit for the new page to load and save the html version of the new page
-                time.sleep(0.5)
-                property_html = session.driver.page_source
-
-                # Get the important information from the house page
-                try:
-                    house_instance.scan_house_page(property_html)
-                except:
-                    print("Time-out when scanning house page")
-                    pass
-
-                # Add the house instance to the session
-                session.add_house(house_instance)
-
-                # Save the house pictures
-                session.save_house_pictures(house_pictures_dir, house_instance.id)
-
-                # Save the floorplan
-                session.save_house_floorplan(floorplans_dir, house_instance.id)
-
-                # Go back to the search results page
-                session.driver.back()
-                time.sleep(0.3)
-
-            except:
-                print("Could not click on property")
-                # Continue to the next iteration of the loop
+            if (
+                garden_option.casefold() != "garden".casefold()
+                and house_instance.id in garden_house_id_list
+            ):
                 continue
+            else:
+                try:
+                    # Click on house link
+                    house_link_element = session.driver.find_element(
+                        By.XPATH,
+                        f'//*[@id="property-{house_instance.id}"]/div/div/div[4]/div[1]/div[2]/a',
+                    )
+                    session.driver.execute_script(
+                        "arguments[0].click();", house_link_element
+                    )
+
+                    # Wait a bit for the new page to load and save the html version of the new page
+                    time.sleep(0.5)
+                    property_html = session.driver.page_source
+
+                    # Get the important information from the house page
+                    house_instance.scan_house_page(property_html)
+
+                    # Add the house instance to the session
+                    session.add_house(house_instance)
+
+                    # Save the house pictures
+                    session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
+
+                    # Save the floorplan
+                    session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
+
+                    # Go back to the search results page
+                    session.driver.back()
+                    time.sleep(0.3)
+
+                except:
+                    print("Could not click on property")
+                    # Continue to the next iteration of the loop
+                    continue
 
         try:
             next_button_args = (
@@ -97,32 +87,73 @@ def main(postcode, garden_option):
             time.sleep(0.5)
 
         except:
-            print("Finished scraping")
+            print(f"Finished scraping {postcode} and {garden_option}")
             break
-    session.generate_and_save_dataframe(data_dir, garden_option, postcode)
-
-    print("Data saved")
+    session.generate_and_save_dataframe(DATA_DIR, garden_option, postcode)
 
 
 if __name__ == "__main__":
     # Check if the correct number of command-line arguments is provided
-    # if len(sys.argv) != 3:
-    #     print("Incorrect number of inputs. Three inputs should be provided")
-    # else:
-    #     # Convert command-line arguments to integers
-    #     postcode_list_str = sys.argv[1]
-    #     # Split the argument string into a list using the comma as a delimiter
-    #     postcode_list = postcode_list_str.split(",")
-    #     garden_option = sys.argv[2]
+    if len(sys.argv) != 3:
+        print("Incorrect number of inputs. Three inputs should be provided")
+    else:
+        # Convert command-line arguments to integers
+        postcode_list_str = sys.argv[1]
+        # Split the argument string into a list using the comma as a delimiter
+        postcode_list = postcode_list_str.split(",")
+        garden_list_str = sys.argv[2]
+        garden_option_list = garden_list_str.split(",")
 
-    #     for postcode in postcode_list:
+        # Define global variables
+        # Get the current month and create a folder to save the data
+        current_month = datetime.now().strftime("%B")
+        current_year = datetime.now().year
+        DATE_FOLDER = f"{current_month} {current_year}"
+
+        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+        FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
+        HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
+        DATA_DIR = os.path.join(CURRENT_DIR, f"data/{DATE_FOLDER}")
+        os.makedirs(DATA_DIR, exist_ok=True)
+
+        for postcode in postcode_list:
+            for garden_option in garden_option_list:
+                if garden_option.casefold() != "garden".casefold():
+                    garden_data = pd.read_parquet(
+                        f"{DATA_DIR}/house_data_garden_{postcode}.parquet"
+                    )
+                    garden_data_id = garden_data["id"].tolist()
+                else:
+                    garden_data_id = []
+                # Call the main function with command-line arguments
+                main(postcode, garden_option, garden_data_id)
+
+    # # Define global variables
+    # # Get the current month and create a folder to save the data
+    # current_month = datetime.now().strftime("%B")
+    # current_year = datetime.now().year
+    # DATE_FOLDER = f"{current_month} {current_year}"
+
+    # CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    # FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
+    # HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
+    # DATA_DIR = os.path.join(CURRENT_DIR, f"data/{DATE_FOLDER}")
+    # os.makedirs(DATA_DIR, exist_ok=True)
+
+    # # For debugging only
+    # # Convert command-line arguments to integers
+    # postcode = "N20PE"
+    # garden_option = "NoGarden"
+
+    # # Call the main function with command-line arguments
+    # main(postcode, garden_option)
+
+    # for postcode in postcode_list:
+    #     for garden_option in garden_option_list:
+    #         if garden_option.casefold() != "garden".casefold():
+    #             garden_data = pd.read_parquet(
+    #                 f"{DATA_DIR}/house_data_garden_{postcode}.parquet"
+    #             )
+    #             garden_data_id = garden_data["id"]
     #         # Call the main function with command-line arguments
-    #         main(postcode, garden_option)
-
-    # For debugging only
-    # Convert command-line arguments to integers
-    postcode = "NW53AF"
-    garden_option = "NoGarden"
-
-    # Call the main function with command-line arguments
-    main(postcode, garden_option)
+    #         main(postcode, garden_option, garden_data_id)
