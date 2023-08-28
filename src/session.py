@@ -9,10 +9,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.select import Select
-from src.house import House
-
+from timeout_decorator import timeout
 
 import pandas as pd
+
+from src.house import House
 
 
 class Session:
@@ -21,21 +22,26 @@ class Session:
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        self.service = Service()
-        self.options = webdriver.ChromeOptions()
+        self.driver_service = Service(executable_path="/opt/homebrew/bin/chromedriver")
+        self.driver_options = webdriver.ChromeOptions()
+        # self.driver_options.binary_location("/opt/homebrew/bin/chromedriver.exe")
+        # self.driver_executable_path = "/opt/homebrew/bin/chromedriver"
         self.house_list = []
 
     def launch_browser_with_extension(self):
         # Define path to the extension
         extension_path = "/Users/albertovidalrodriguez-bobada/Library/Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0"
         # Add the extension and launch Chrome
-        self.options.add_argument("--load-extension=" + extension_path)
-        self.driver = webdriver.Chrome(service=self.service, options=self.options)
+        self.driver_options.add_argument("--load-extension=" + extension_path)
+        self.driver = webdriver.Chrome(
+            service=self.driver_service,
+            options=self.driver_options,
+        )
         self.driver.get(self.url)
 
         # Define the wait element to pause the script until an element is found or ready to
         # be clicked
-        self.wait = WebDriverWait(self.driver, 5)
+        self.wait = WebDriverWait(self.driver, 10)
 
         # Find cookie button and accept cookies
         cookie_button_args = (By.ID, "onetrust-accept-btn-handler")
@@ -46,13 +52,17 @@ class Session:
 
     def set_search_parameters(self, postcode, garden_option):
         # Find postcode field and search button
-        postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
-        search_button = self.driver.find_element(by=By.ID, value="search")
+        # postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
+        # search_button = self.driver.find_element(by=By.ID, value="search")
+        postcode_element = self.driver.find_element(
+            By.CLASS_NAME, value="ksc_typeAheadInputField"
+        )
+        search_button = self.driver.find_element(By.CLASS_NAME, value="ksc_button")
 
         # Fill the postcode
         postcode_element.send_keys(postcode)
         # self.wait until the update button is clickable and then click it
-        self.wait.until(EC.element_to_be_clickable((By.ID, "search")))
+        self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "ksc_button")))
         self.driver.execute_script("arguments[0].click();", search_button)
 
         # Select property features
@@ -162,6 +172,27 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(close_filter_args))
         self.driver.execute_script("arguments[0].click();", close_filter_button)
 
+    # @timeout(10)
+    # def click_on_house(self, house_id):
+    #     # Click on house link
+    #     house_link_element = self.driver.find_element(
+    #         By.XPATH,
+    #         f'//*[@id="property-{house_id}"]/div/div/div[4]/div[1]/div[2]/a',
+    #     )
+    #     self.driver.execute_script("arguments[0].click();", house_link_element)
+
+    @timeout(10)
+    def click_on_house(self, house_id):
+        current_url = self.driver.current_url
+        try:
+            house_url = (
+                f"https://www.rightmove.co.uk/properties/{house_id}#/?channel=RES_BUY"
+            )
+            self.driver.get(house_url)
+        except:
+            print("Here we are")
+            self.driver.get(current_url)
+
     def save_house_floorplan(self, floorplans_dir, house_id):
         time.sleep(0.3)
         try:
@@ -264,6 +295,9 @@ class Session:
             "tenure": [house.tenure for house in self.house_list],
             "key_features": [house.key_features for house in self.house_list],
             "close_stations": [house.close_stations for house in self.house_list],
+            "close_stations_type": [
+                house.close_stations_type for house in self.house_list
+            ],
             "tenure_ground_rent": [
                 house.tenure_ground_rent for house in self.house_list
             ],
@@ -278,7 +312,7 @@ class Session:
         if garden_option.casefold() == "garden".casefold():
             garden_save_str = "garden"
         else:
-            garden_save_str = "garden_and_no_garden"
+            garden_save_str = "no_garden"
         self.house_dataframe = pd.DataFrame(data)
         self.house_dataframe.to_csv(
             f"{data_dir}/house_data_{garden_save_str}_{postcode}.csv"

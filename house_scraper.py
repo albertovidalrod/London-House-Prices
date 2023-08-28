@@ -1,16 +1,73 @@
 import time
 import os
 import sys
-import concurrent.futures
+
+# import chromedriver_autoinstaller
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from timeout_decorator import timeout, TimeoutError
+
 
 from src.session import Session
 from src.house import House
+
+
+@timeout(10)
+def iter_wrapper(session: Session, house, garden_house_id_list) -> None:
+    # Create an instance of the House class to store the scraped information
+    house_instance = House()
+
+    # Create soup object from the property's html content
+    house_ad_html = str(house)
+
+    # Get the important information from the house ad on the search results page
+    try:
+        house_instance.scan_house_ad(house_ad_html)
+    except TimeoutError:
+        print("Time out scanning the house ad. Skipping to next house")
+        return
+
+    # Get the important information from the house page
+    try:
+        session.click_on_house(house_instance.id)
+    except TimeoutError:
+        print("Time out clicking on house. Skipping to next house")
+        # Go back to the search results page
+        session.driver.back()
+        time.sleep(0.3)
+        return
+    except:
+        print("Could not click on house element")
+        session.driver.back()
+        time.sleep(0.3)
+        return
+
+    # Wait a bit for the new page to load and save the html version of the new page
+    time.sleep(0.5)
+    property_html = session.driver.page_source
+
+    # Get the important information from the house page
+    try:
+        house_instance.scan_house_page(property_html)
+    except TimeoutError:
+        print("Time out scanning the house page")
+
+    # Add the house instance to the session
+    session.add_house(house_instance)
+
+    # Save the house pictures
+    session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
+
+    # Save the floorplan
+    session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
+
+    # Go back to the search results page
+    session.driver.back()
+    time.sleep(0.3)
 
 
 def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> None:
@@ -25,55 +82,64 @@ def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> N
         houses = soup.find_all("div", {"class": "l-searchResult is-list"})
 
         for house in houses:
-            # Create an instance of the House class to store the scraped information
-            house_instance = House()
+            try:
+                time.sleep(0.4)
+                iter_wrapper(session, house, garden_house_id_list)
+            except TimeoutError:
+                print("Time out gathering data. Skipping to next house")
+            # # Create an instance of the House class to store the scraped information
+            # house_instance = House()
 
-            # Create soup object from the property's html content
-            house_ad_html = str(house)
+            # # Create soup object from the property's html content
+            # house_ad_html = str(house)
 
-            # Get the important information from the house ad on the search results page
-            house_instance.scan_house_ad(house_ad_html)
+            # # Get the important information from the house ad on the search results page
+            # try:
+            #     house_instance.scan_house_ad(house_ad_html)
+            # except TimeoutError:
+            #     print("Time out scanning the house ad. Skipping to next house")
+            #     continue
 
-            if (
-                garden_option.casefold() != "garden".casefold()
-                and house_instance.id in garden_house_id_list
-            ):
-                continue
-            else:
-                try:
-                    # Click on house link
-                    house_link_element = session.driver.find_element(
-                        By.XPATH,
-                        f'//*[@id="property-{house_instance.id}"]/div/div/div[4]/div[1]/div[2]/a',
-                    )
-                    session.driver.execute_script(
-                        "arguments[0].click();", house_link_element
-                    )
+            # if (
+            #     garden_option.casefold() != "garden".casefold()
+            #     and house_instance.id in garden_house_id_list
+            # ):
+            #     continue
+            # else:
+            #     # Get the important information from the house page
+            #     try:
+            #         session.click_on_house(house_instance.id)
+            #     except TimeoutError:
+            #         print("Time out clicking on house. Skipping to next house")
+            #         # Go back to the search results page
+            #         session.driver.back()
+            #         time.sleep(0.3)
+            #         continue
+            #     except:
+            #         print("Could not click on house element")
 
-                    # Wait a bit for the new page to load and save the html version of the new page
-                    time.sleep(0.5)
-                    property_html = session.driver.page_source
+            #     # Wait a bit for the new page to load and save the html version of the new page
+            #     time.sleep(0.5)
+            #     property_html = session.driver.page_source
 
-                    # Get the important information from the house page
-                    house_instance.scan_house_page(property_html)
+            #     # Get the important information from the house page
+            #     try:
+            #         house_instance.scan_house_page(property_html)
+            #     except TimeoutError:
+            #         print("Time out scanning the house page")
 
-                    # Add the house instance to the session
-                    session.add_house(house_instance)
+            #     # Add the house instance to the session
+            #     session.add_house(house_instance)
 
-                    # Save the house pictures
-                    session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
+            #     # Save the house pictures
+            #     session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
 
-                    # Save the floorplan
-                    session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
+            #     # Save the floorplan
+            #     session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
 
-                    # Go back to the search results page
-                    session.driver.back()
-                    time.sleep(0.3)
-
-                except:
-                    print("Could not click on property")
-                    # Continue to the next iteration of the loop
-                    continue
+            #     # Go back to the search results page
+            #     session.driver.back()
+            #     time.sleep(0.3)
 
         try:
             next_button_args = (
@@ -84,15 +150,19 @@ def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> N
                 EC.element_to_be_clickable(next_button_args)
             )
             session.driver.execute_script("arguments[0].click();", next_button)
-            time.sleep(0.5)
+            time.sleep(0.75)
 
         except:
             print(f"Finished scraping {postcode} and {garden_option}")
             break
+
     session.generate_and_save_dataframe(DATA_DIR, garden_option, postcode)
+    session.driver.quit()
+    del session
 
 
 if __name__ == "__main__":
+    # chromedriver_autoinstaller.install()
     # Check if the correct number of command-line arguments is provided
     if len(sys.argv) != 3:
         print("Incorrect number of inputs. Three inputs should be provided")
@@ -142,11 +212,9 @@ if __name__ == "__main__":
 
     # # For debugging only
     # # Convert command-line arguments to integers
-    # postcode = "N20PE"
-    # garden_option = "NoGarden"
-
-    # # Call the main function with command-line arguments
-    # main(postcode, garden_option)
+    # # postcode_list = ["N193TX", "NW53AF", "N20PE"]
+    # postcode_list = ["N20PE"]
+    # garden_option_list = ["Garden", "NoGarden"]
 
     # for postcode in postcode_list:
     #     for garden_option in garden_option_list:
@@ -155,5 +223,7 @@ if __name__ == "__main__":
     #                 f"{DATA_DIR}/house_data_garden_{postcode}.parquet"
     #             )
     #             garden_data_id = garden_data["id"]
+    #         else:
+    #             garden_data_id = []
     #         # Call the main function with command-line arguments
     #         main(postcode, garden_option, garden_data_id)
