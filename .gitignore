@@ -3,6 +3,7 @@
 test_class.py
 extract_text.py
 test_main.py
+commands.txt
 
 # Folders
 *__pycache__/

@@ -14,10 +14,11 @@ from timeout_decorator import timeout, TimeoutError
 
 from src.session import Session
 from src.house import House
+from src.utils import generate_scraping_metadata
 
 
 @timeout(10)
-def iter_wrapper(session: Session, house, garden_house_id_list) -> None:
+def iter_wrapper(session: Session, house) -> None:
     # Create an instance of the House class to store the scraped information
     house_instance = House()
 
@@ -60,7 +61,7 @@ def iter_wrapper(session: Session, house, garden_house_id_list) -> None:
     session.add_house(house_instance)
 
     # Save the house pictures
-    session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
+    # session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
 
     # Save the floorplan
     session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
@@ -70,7 +71,7 @@ def iter_wrapper(session: Session, house, garden_house_id_list) -> None:
     time.sleep(0.3)
 
 
-def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> None:
+def main(postcode: str, garden_option: str) -> None:
     session = Session()
     session.launch_browser_with_extension()
     session.set_search_parameters(postcode, garden_option)
@@ -84,7 +85,7 @@ def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> N
         for house in houses:
             try:
                 time.sleep(0.4)
-                iter_wrapper(session, house, garden_house_id_list)
+                iter_wrapper(session, house)
             except TimeoutError:
                 print("Time out gathering data. Skipping to next house")
             # # Create an instance of the House class to store the scraped information
@@ -150,7 +151,7 @@ def main(postcode: str, garden_option: str, garden_house_id_list: str = []) -> N
                 EC.element_to_be_clickable(next_button_args)
             )
             session.driver.execute_script("arguments[0].click();", next_button)
-            time.sleep(0.75)
+            time.sleep(1.5)
 
         except:
             print(f"Finished scraping {postcode} and {garden_option}")
@@ -188,15 +189,10 @@ if __name__ == "__main__":
 
         for postcode in postcode_list:
             for garden_option in garden_option_list:
-                if garden_option.casefold() != "garden".casefold():
-                    garden_data = pd.read_parquet(
-                        f"{DATA_DIR}/house_data_garden_{postcode}.parquet"
-                    )
-                    garden_data_id = garden_data["id"].tolist()
-                else:
-                    garden_data_id = []
                 # Call the main function with command-line arguments
-                main(postcode, garden_option, garden_data_id)
+                main(postcode, garden_option)
+
+    generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
 
     # # Define global variables
     # # Get the current month and create a folder to save the data
@@ -212,18 +208,13 @@ if __name__ == "__main__":
 
     # # For debugging only
     # # Convert command-line arguments to integers
-    # # postcode_list = ["N193TX", "NW53AF", "N20PE"]
-    # postcode_list = ["N20PE"]
+    # postcode_list = ["N193TX", "NW53AF", "N20PE"]
+    # # postcode_list = ["N20PE"]
     # garden_option_list = ["Garden", "NoGarden"]
+
+    # generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
 
     # for postcode in postcode_list:
     #     for garden_option in garden_option_list:
-    #         if garden_option.casefold() != "garden".casefold():
-    #             garden_data = pd.read_parquet(
-    #                 f"{DATA_DIR}/house_data_garden_{postcode}.parquet"
-    #             )
-    #             garden_data_id = garden_data["id"]
-    #         else:
-    #             garden_data_id = []
     #         # Call the main function with command-line arguments
-    #         main(postcode, garden_option, garden_data_id)
+    #         main(postcode, garden_option)

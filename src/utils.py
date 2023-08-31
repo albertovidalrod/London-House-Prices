@@ -1,44 +1,10 @@
 import re
 import pytesseract
 import geocoder
+import os
+import json
+from datetime import datetime
 from PIL import Image
-
-
-def extract_data_from_floorplan(image_path: str = None):
-    # image_path = "media/floorplans/77570946_floorplan.png"
-
-    # Open the image file
-    image = Image.open(image_path)
-
-    # Perform OCR using PyTesseract
-    extracted_text = pytesseract.image_to_string(image)
-    extracted_text = extracted_text.lower()
-    if ".com" in extracted_text or ".co.uk" in extracted_text:
-        extracted_text = re.sub(
-            r"\.(co\.uk|com).*$", r"\1", extracted_text, flags=re.DOTALL
-        )
-    if "ref" in extracted_text:
-        extracted_text = re.sub(r"(ref).*$", "", extracted_text, flags=re.DOTALL)
-    if "tel" in extracted_text:
-        extracted_text = re.sub(r"(tel).*$", "", extracted_text, flags=re.DOTALL)
-
-    # Define a regular expression pattern to match numbers along with any symbols
-    # pattern = r"\d+[^\w\s]*"
-    pattern = r'\d+(?:[\'°"]\d*)?(?:\.\d+)?'
-
-    # Use regex to find all numbers in the text
-    numbers_and_symbols = re.findall(pattern, extracted_text)
-
-    # Extract the numbers only
-    numbers = [
-        float(num)
-        for num in numbers_and_symbols
-        if re.match(r"^\d+(\.\d+)?$", num) or num.isnumeric()
-    ]
-    sorted_numbers = sorted(numbers)
-    last_values = sorted_numbers[-2:]
-
-    return last_values
 
 
 def floorplan_includes_garden(image_id: str = None) -> str:
@@ -189,7 +155,7 @@ def extract_area_from_floorplan(image_id: str = None) -> float:
                 else:
                     return last_values[-2]
             else:
-                return sorted_numbers[-2]
+                return sorted_numbers[-1]
         else:
             return None
     except:
@@ -221,3 +187,37 @@ def extract_area_from_dataframe(size_str: str) -> float:
         return number_before_sqft
     else:
         return None
+
+
+def generate_scraping_metadata(
+    data_dir: str, postcode_list: list, garden_option_list: list
+):
+    current_date = datetime.now()
+    current_year = current_date.strftime("%Y")
+    current_month = current_date.strftime("%B")
+    current_date_string = current_date.strftime("%d/%m/%Y")
+
+    metadata_filename = f"{current_month}_{current_year}_scraping_metadata"
+
+    files_generated = []
+    for postcode in postcode_list:
+        for garden_option in garden_option_list:
+            # Call the main function with command-line arguments
+
+            if garden_option.casefold() == "garden".casefold():
+                garden_save_str = "garden"
+            else:
+                garden_save_str = "no_garden"
+            files_generated.append(f"house_data_{garden_save_str}_{postcode}")
+
+    metadata = {
+        "creation_date": current_date_string,
+        "postcodes": postcode_list,
+        "garden_options": garden_option_list,
+        "files_generated": files_generated,
+    }
+
+    # Save the metadata to a JSON file
+    metadata_path = data_dir + f"/{metadata_filename}.json"
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file, indent=4)
