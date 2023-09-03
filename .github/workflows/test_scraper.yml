@@ -20,18 +20,22 @@ jobs:
         run: sudo apt purge google-chrome-stable
         
       - name: Create Extension Directory
-        run: mkdir -p /home/runner/work/London-House-Prices/chrome_extension
+        run: mkdir -p /home/runner/work/London-House-Prices/chrome_extension_zip
+             mkdir -p /home/runner/work/London-House-Prices/chrome_extension
         
       - name: Download Chrome Extension
         run: |
+          # Define download and unzip paths
+          DOWNLOAD_PATH="/home/runner/work/London-House-Prices/chrome_extension_zip/extension.zip"
+          UNZIP_PATH="/home/runner/work/London-House-Prices/chrome_extension"
           # Download the Chrome extension from the Chrome Web Store URL
-          wget -O extension.zip "https://chrome.google.com/webstore/detail/property-log/jccihedpilhidcbkconacnalppdeecno"
+          wget -O "$DOWNLOAD_PATH" "https://chrome.google.com/webstore/detail/property-log/jccihedpilhidcbkconacnalppdeecno"
   
           # Unzip the extension (you may need to adjust this depending on the extension)
-          unzip extension.zip -d extension
+          unzip "$DOWNLOAD_PATH" -d "$EXTRACT_PATH"
   
           # Move the extension to a location accessible to your Selenium script
-          mv extension /home/runner/work/London-House-Prices/chrome_extension
+          # mv extension /home/runner/work/London-House-Prices/chrome_extension
         
        # Need to fetch reqs if needed
       # - name: Installing all necessary packages
