@@ -28,6 +28,7 @@ jobs:
           # Define download and unzip paths
           DOWNLOAD_PATH="/home/runner/work/London-House-Prices/chrome_extension_zip/extension.zip"
           UNZIP_PATH="/home/runner/work/London-House-Prices/chrome_extension"
+
           # Download the Chrome extension from the Chrome Web Store URL
           wget -O "$DOWNLOAD_PATH" "https://chrome.google.com/webstore/detail/property-log/jccihedpilhidcbkconacnalppdeecno"
   
@@ -36,19 +37,18 @@ jobs:
   
           # Move the extension to a location accessible to your Selenium script
           # mv extension /home/runner/work/London-House-Prices/chrome_extension
-        
-       # Need to fetch reqs if needed
+
       # - name: Installing all necessary packages
       #   run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
       # - name: Install xvfb
       #   run: sudo apt-get install xvfb
-      # - name: install python packages
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install -r requirements.txt
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # - name: Running the Python script
-      #   run: python test_house_scraper.py
+      - name: Running the Python script
+        run: python test_house_scraper.py
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
