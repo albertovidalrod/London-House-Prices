@@ -8,3 +8,5 @@ commands.txt
 # Folders
 *__pycache__/
 media/
+media_test/
+data_test/
