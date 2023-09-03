@@ -32,7 +32,7 @@ jobs:
           wget -O "$DOWNLOAD_PATH" "https://chrome.google.com/webstore/detail/property-log/jccihedpilhidcbkconacnalppdeecno"
   
           # Unzip the extension (you may need to adjust this depending on the extension)
-          unzip "$DOWNLOAD_PATH" -d "$EXTRACT_PATH"
+          # unzip "$DOWNLOAD_PATH" -d "$EXTRACT_PATH"
   
           # Move the extension to a location accessible to your Selenium script
           # mv extension /home/runner/work/London-House-Prices/chrome_extension
