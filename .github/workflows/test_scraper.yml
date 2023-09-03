@@ -48,7 +48,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Running the Python script
-        run: python test_house_scraper.py
+        run: python house_scraper_headless_gh_actions.py
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
