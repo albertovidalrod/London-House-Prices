@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.select import Select
 from timeout_decorator import timeout
+from webdriver_manager.chrome import ChromeDriverManager
 
 import pandas as pd
 
@@ -21,15 +22,14 @@ class Session:
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        self.driver_service = Service()
+        self.driver_service = Service(ChromeDriverManager().install())
         self.driver_options = webdriver.ChromeOptions()
-        # self.driver_options.add_argument("--headless")
+        self.driver_options.add_argument("--headless")
         self.house_list = []
 
     def launch_browser_with_extension(self, current_dir):
         # Define path to the extension
         extension_path = os.path.join(current_dir, "chrome_extensions/1.6.1_0")
-        # extension_path = "/Users/albertovidalrodriguez-bobada/Library/Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0"
         # Add the extension and launch Chrome
         # self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
@@ -51,8 +51,6 @@ class Session:
 
     def set_search_parameters(self, postcode, garden_option):
         # Find postcode field and search button
-        # postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
-        # search_button = self.driver.find_element(by=By.ID, value="search")
         postcode_element = self.driver.find_element(
             By.CLASS_NAME, value="ksc_typeAheadInputField"
         )
@@ -173,7 +171,7 @@ class Session:
 
     @timeout(10)
     def click_on_house(self, house_id):
-        current_url = self.driver.current_url()
+        current_url = self.driver.current_url
         try:
             house_url = (
                 f"https://www.rightmove.co.uk/properties/{house_id}#/?channel=RES_BUY"
