@@ -2,7 +2,7 @@ import time
 import os
 import sys
 
-import chromedriver_autoinstaller
+# import chromedriver_autoinstaller
 
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -110,7 +110,7 @@ def main(postcode: str, garden_option: str) -> None:
 
 
 if __name__ == "__main__":
-    chromedriver_autoinstaller.install()
+    # chromedriver_autoinstaller.install()
     # Check if the correct number of command-line arguments is provided
     # if len(sys.argv) != 3:
     #     print("Incorrect number of inputs. Three inputs should be provided")
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/floorplans")
     HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/house_pictures")
-    DATA_DIR = os.path.join(CURRENT_DIR, f"data_test/{DATE_FOLDER}")
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data_gh_actions/{DATE_FOLDER}")
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
     os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)

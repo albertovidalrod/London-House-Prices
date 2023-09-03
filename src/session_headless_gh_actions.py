@@ -23,14 +23,15 @@ class Session:
         # Get url information
         self.driver_service = Service()
         self.driver_options = webdriver.ChromeOptions()
-        self.driver_options.add_argument("--headless")
+        # self.driver_options.add_argument("--headless")
         self.house_list = []
 
     def launch_browser_with_extension(self, current_dir):
         # Define path to the extension
         extension_path = os.path.join(current_dir, "chrome_extensions/1.6.1_0")
+        # extension_path = "/Users/albertovidalrodriguez-bobada/Library/Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0"
         # Add the extension and launch Chrome
-        self.driver_options.add_argument("--load-extension=" + extension_path)
+        # self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
             service=self.driver_service,
             options=self.driver_options,
