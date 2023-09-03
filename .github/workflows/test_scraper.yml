@@ -20,7 +20,7 @@ jobs:
         run: sudo apt purge google-chrome-stable
         
       - name: Create Extension Directory
-        run: mkdir -p /chrome_extension
+        run: mkdir -p /home/runner/work/London-House-Prices/chrome_extension
         
       - name: Download Chrome Extension
         run: |
@@ -31,7 +31,7 @@ jobs:
           unzip extension.zip -d extension
   
           # Move the extension to a location accessible to your Selenium script
-          mv extension /chrome_extension
+          mv extension /home/runner/work/London-House-Prices/chrome_extension
         
        # Need to fetch reqs if needed
       # - name: Installing all necessary packages
