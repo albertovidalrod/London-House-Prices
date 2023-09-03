@@ -4,6 +4,7 @@ test_class.py
 extract_text.py
 test_main.py
 commands.txt
+house_price_analysis.ipynb
 
 # Folders
 *__pycache__/
