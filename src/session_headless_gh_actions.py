@@ -26,13 +26,11 @@ class Session:
         self.driver_options.add_argument("--headless")
         self.house_list = []
 
-    def launch_browser_with_extension(self):
+    def launch_browser_with_extension(self, current_dir):
         # Define path to the extension
-        extension_path = (
-            "/home/runner/work/London-House-Prices/chrome_extension_zip/extension.zip"
-        )
+        extension_path = os.path.join(current_dir, "chrome_extensions/1.6.1_0")
         # Add the extension and launch Chrome
-        self.driver_options.add_extension(extension_path)
+        self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
             service=self.driver_service,
             options=self.driver_options,

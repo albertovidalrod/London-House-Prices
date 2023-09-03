@@ -73,7 +73,7 @@ def house_scraping_wrapper(session: Session, house) -> None:
 
 def main(postcode: str, garden_option: str) -> None:
     session = Session()
-    session.launch_browser_with_extension()
+    session.launch_browser_with_extension(CURRENT_DIR)
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
 
