@@ -1,1 +1,0 @@
-function viewToken(){chrome.storage.sync.get("pl_token",function(result){result.pl_token?alert("Your unique Property Log ID is: "+result.pl_token):alert("Unable to fetch your Property Log ID, please contact support")})}window.onload=function(){document.getElementById("pl-token").addEventListener("click",viewToken)};

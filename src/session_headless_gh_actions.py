@@ -27,8 +27,9 @@ class Session:
 
     def launch_browser_with_extension(self, current_dir):
         # Define path to the extension
-        extension_path = os.path.join(current_dir, "chrome_extensions/1.6.1_0")
+        extension_path = os.path.join(current_dir, "chrome_extension/property_log.zip")
         # Add the extension and launch Chrome
+        self.driver_options.add_extension(extension_path)
         # self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
             service=self.driver_service,
