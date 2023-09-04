@@ -22,7 +22,8 @@ class Session:
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        self.driver_service = Service(ChromeDriverManager().install())
+        # self.driver_service = Service(ChromeDriverManager().install())
+        self.driver_service = Service(executable_path="/usr/bin/chromium")
         self.driver_options = webdriver.ChromeOptions()
         self.driver_options.add_argument("--headless")
         self.house_list = []
