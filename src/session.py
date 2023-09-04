@@ -15,20 +15,23 @@ from src.house import House
 
 
 class Session:
-    def __init__(self):
+    def __init__(self, mode: str) -> None:
         # Define the url from which the data will be scraped
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        self.driver_service = Service(executable_path="/opt/homebrew/bin/chromedriver")
-        self.driver_options = webdriver.ChromeOptions()
-        # self.driver_options.binary_location("/opt/homebrew/bin/chromedriver.exe")
-        # self.driver_executable_path = "/opt/homebrew/bin/chromedriver"
         self.house_list = []
 
-    def launch_browser_with_extension(self):
+        # Load config files depending on mode
+
+    def launch_browser_with_extension(self, current_dir: str) -> None:
+        self.driver_service = Service(executable_path="/opt/homebrew/bin/chromedriver")
+        self.driver_options = webdriver.ChromeOptions()
         # Define path to the extension
-        extension_path = "/Users/albertovidalrodriguez-bobada/Library/Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0"
+        extension_path = os.path.join(
+            current_dir,
+            "../../../../../Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0",
+        )
         # Add the extension and launch Chrome
         self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
@@ -48,7 +51,28 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(cookie_button_args))
         self.driver.execute_script("arguments[0].click();", cookie_button)
 
-    def set_search_parameters(self, postcode, garden_option):
+    def launch_browser_headless_mode(self) -> None:
+        self.driver_service = Service()
+        self.driver_options = webdriver.ChromeOptions()
+        self.driver_options.add_argument("--headless")
+        self.driver = webdriver.Chrome(
+            service=self.driver_service,
+            options=self.driver_options,
+        )
+        self.driver.get(self.url)
+
+        # Define the wait element to pause the script until an element is found or ready to
+        # be clicked
+        self.wait = WebDriverWait(self.driver, 10)
+
+        # Find cookie button and accept cookies
+        cookie_button_args = (By.ID, "onetrust-accept-btn-handler")
+        self.wait.until(EC.presence_of_element_located(cookie_button_args))
+        cookie_button = self.driver.find_element(*cookie_button_args)
+        self.wait.until(EC.element_to_be_clickable(cookie_button_args))
+        self.driver.execute_script("arguments[0].click();", cookie_button)
+
+    def set_search_parameters(self, postcode: str, garden_option: str) -> None:
         # Find postcode field and search button
         # postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
         # search_button = self.driver.find_element(by=By.ID, value="search")
@@ -170,35 +194,25 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(close_filter_args))
         self.driver.execute_script("arguments[0].click();", close_filter_button)
 
-    # @timeout(10)
-    # def click_on_house(self, house_id):
-    #     # Click on house link
-    #     house_link_element = self.driver.find_element(
-    #         By.XPATH,
-    #         f'//*[@id="property-{house_id}"]/div/div/div[4]/div[1]/div[2]/a',
-    #     )
-    #     self.driver.execute_script("arguments[0].click();", house_link_element)
-
     @timeout(10)
-    def click_on_house(self, house_id):
+    def click_on_house(self, house_id: str) -> None:
         current_url = self.driver.current_url
         try:
             house_url = (
                 f"https://www.rightmove.co.uk/properties/{house_id}#/?channel=RES_BUY"
             )
             self.driver.get(house_url)
+            time.sleep(0.5)
         except:
-            print("Here we are")
+            print("Time out trying to click on the house link")
             self.driver.get(current_url)
+            time.sleep(0.5)
 
     def save_house_floorplan(self, floorplans_dir, house_id):
-        time.sleep(0.3)
         try:
+            floorplan_url = f"https://www.rightmove.co.uk/properties/{house_id}#/floorplan?channel=RES_BUY"
             # Click on the floorplan and download it
-            floorplan_element = self.driver.find_element(
-                By.CSS_SELECTOR, "a.L-Cl2uB-55GVm9PtHfL3"
-            )
-            floorplan_element.click()
+            self.driver.get(floorplan_url)
             time.sleep(0.5)
 
             # Locate the new img element on the new page
@@ -222,13 +236,11 @@ class Session:
             print("Could not find the floorplan")
             return
 
-    def save_house_pictures(self, house_pictures_dir, house_id):
+    def save_house_pictures(self, house_pictures_dir: str, house_id: str) -> None:
         try:
             # Click on the house pictures
-            house_pictures_element = self.driver.find_element(
-                By.CSS_SELECTOR, "a._345hU7-W8dOLOomnuuoDVx"
-            )
-            house_pictures_element.click()
+            pictures_url = f"https://www.rightmove.co.uk/properties/{house_id}#/media?channel=RES_BUY"
+            self.driver.get(pictures_url)
             time.sleep(0.3)
 
             # Find the element that contains all the pictures
@@ -263,11 +275,12 @@ class Session:
 
             # Go back to the property details page
             self.driver.back()
+            time.sleep(0.3)
         except:
             print("Could not find the pictures of the house")
             return
 
-    def add_house(self, house):
+    def add_house(self, house: House) -> None:
         if isinstance(house, House):
             self.house_list.append(house)
         else:

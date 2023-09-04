@@ -20,16 +20,12 @@ class Session:
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        self.driver_service = Service(executable_path="/opt/homebrew/bin/chromedriver")
+        self.driver_service = Service()
         self.driver_options = webdriver.ChromeOptions()
         self.driver_options.add_argument("--headless")
         self.house_list = []
 
     def launch_browser_with_extension(self):
-        # Define path to the extension
-        extension_path = "/Users/albertovidalrodriguez-bobada/Library/Application Support/Google/Chrome/Default/Extensions/jccihedpilhidcbkconacnalppdeecno/1.6.1_0"
-        # Add the extension and launch Chrome
-        self.driver_options.add_argument("--load-extension=" + extension_path)
         self.driver = webdriver.Chrome(
             service=self.driver_service,
             options=self.driver_options,
@@ -49,8 +45,6 @@ class Session:
 
     def set_search_parameters(self, postcode, garden_option):
         # Find postcode field and search button
-        # postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
-        # search_button = self.driver.find_element(by=By.ID, value="search")
         postcode_element = self.driver.find_element(
             By.CLASS_NAME, value="ksc_typeAheadInputField"
         )
@@ -171,7 +165,7 @@ class Session:
 
     @timeout(10)
     def click_on_house(self, house_id):
-        current_url = self.driver.current_url()
+        current_url = self.driver.current_url
         try:
             house_url = (
                 f"https://www.rightmove.co.uk/properties/{house_id}#/?channel=RES_BUY"
@@ -182,7 +176,6 @@ class Session:
             self.driver.get(current_url)
 
     def save_house_floorplan(self, floorplans_dir, house_id):
-        time.sleep(0.3)
         try:
             floorplan_url = f"https://www.rightmove.co.uk/properties/{house_id}#/floorplan?channel=RES_BUY"
             # Click on the floorplan and download it
@@ -215,7 +208,7 @@ class Session:
             # Click on the house pictures
             pictures_url = f"https://www.rightmove.co.uk/properties/{house_id}#/media?channel=RES_BUY"
             self.driver.get(pictures_url)
-            time.sleep(0.5)
+            time.sleep(0.3)
 
             # Find the element that contains all the pictures
             parent_element = self.driver.find_elements(

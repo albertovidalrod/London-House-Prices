@@ -5,6 +5,8 @@ extract_text.py
 test_main.py
 commands.txt
 house_price_analysis.ipynb
+.env
+house_scraper_headless_local.py
 
 # Folders
 *__pycache__/
