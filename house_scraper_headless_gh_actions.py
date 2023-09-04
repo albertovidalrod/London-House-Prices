@@ -2,7 +2,6 @@ import time
 import os
 import sys
 
-import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium.webdriver.common.by import By
@@ -15,7 +14,7 @@ from src.house import House
 from src.utils import generate_scraping_metadata
 
 
-@timeout(1000)
+@timeout(10)
 def house_scraping_wrapper(session: Session, house) -> None:
     # Create an instance of the House class to store the scraped information
     house_instance = House()

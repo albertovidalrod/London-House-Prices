@@ -1,8 +1,6 @@
 import requests
 import time
 import os
-from bs4 import BeautifulSoup
-from requests_html import HTMLSession
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait

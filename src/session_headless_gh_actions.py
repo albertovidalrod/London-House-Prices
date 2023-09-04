@@ -1,7 +1,6 @@
 import requests
 import time
 import os
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -9,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.select import Select
 from timeout_decorator import timeout
-from webdriver_manager.chrome import ChromeDriverManager
 
 import pandas as pd
 
@@ -22,8 +20,6 @@ class Session:
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
         # Get url information
-        # self.driver_service = Service(ChromeDriverManager().install())
-        # self.driver_service = Service(executable_path="/usr/bin/chromium")
         self.driver_service = Service()
         self.driver_options = webdriver.ChromeOptions()
         self.driver_options.add_argument("--headless")

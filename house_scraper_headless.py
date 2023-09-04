@@ -4,7 +4,6 @@ import sys
 
 # import chromedriver_autoinstaller
 
-import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 from selenium.webdriver.common.by import By
