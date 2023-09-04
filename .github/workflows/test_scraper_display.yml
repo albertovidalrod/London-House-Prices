@@ -18,14 +18,20 @@ jobs:
         
       - name: Removing previous chrome instances on runner 
         run: sudo apt purge google-chrome-stable
+        
 
+      # - name: Installing all necessary packages
+      #   run: pip install chromedriver-autoinstaller selenium pyvirtualdisplay
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
+        
       - name: install python packages
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Running the Python script
-        run: python house_scraper_headless_gh_actions.py
+        run: python house_scraper_gh_actions.py
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
