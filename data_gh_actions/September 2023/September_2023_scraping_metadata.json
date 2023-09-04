@@ -1,0 +1,14 @@
+{
+    "creation_date": "04/09/2023",
+    "postcodes": [
+        "N20PE"
+    ],
+    "garden_options": [
+        "Garden",
+        "NoGarden"
+    ],
+    "files_generated": [
+        "house_data_garden_N20PE",
+        "house_data_no_garden_N20PE"
+    ]
+}
