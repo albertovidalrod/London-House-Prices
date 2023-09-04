@@ -64,8 +64,8 @@ def house_scraping_wrapper(session: Session, house: House) -> None:
     time.sleep(0.4)
 
 
-def main(postcode: str, garden_option: str) -> None:
-    session = Session()
+def main(postcode: str, garden_option: str, mode: str) -> None:
+    session = Session(mode)
     session.launch_browser_headless_mode()
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
@@ -155,10 +155,11 @@ if __name__ == "__main__":
     postcode_list = ["N20PE"]
     # postcode_list = ["N20PE"]
     garden_option_list = ["Garden"]
+    mode = "headless"
 
     for postcode in postcode_list:
         for garden_option in garden_option_list:
             # Call the main function with command-line arguments
-            main(postcode, garden_option)
+            main(postcode, garden_option, mode)
 
     generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
