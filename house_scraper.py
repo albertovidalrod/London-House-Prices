@@ -70,7 +70,7 @@ def iter_wrapper(session: Session, house) -> None:
 
 
 def main(postcode: str, garden_option: str, search_area: str) -> None:
-    session = Session(search_area)
+    session = Session(search_area, CURRENT_DIR)
     session.launch_browser_with_extension(CURRENT_DIR)
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     postcode_list = ["N193TX", "NW53AF", "N20PE"]
     # postcode_list = ["N20PE"]
     garden_option_list = ["Garden", "NoGarden"]
-    search_area = "north london"
+    search_area = "all postcodes"
 
     for postcode in postcode_list:
         for garden_option in garden_option_list:

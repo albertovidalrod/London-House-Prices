@@ -17,7 +17,7 @@ from src.house import House
 
 
 class Session:
-    def __init__(self, search_area: str) -> None:
+    def __init__(self, search_area: str, current_dir: str) -> None:
         # Define the url from which the data will be scraped
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
@@ -26,16 +26,20 @@ class Session:
 
         # Load config files depending on mode
         if search_area == "north london":
-            config_file_name = "config_north_london.yml"
+            config_file_path = os.path.join(
+                current_dir, "config/config_north_london.yml"
+            )
         elif search_area == "all postcodes":
-            config_file_name = "config_all_postcodes.yml"
+            config_file_path = os.path.join(
+                current_dir, "config/config_all_postcodes.yml"
+            )
         else:
             raise ValueError(
                 "Invalid search area. Search area must be 'north london' or 'all postcodes'."
             )
 
         # Load the configuration from the YAML file
-        with open(config_file_name, "r") as config_file:
+        with open(config_file_path, "r") as config_file:
             config = yaml.safe_load(config_file)
         self._search_radius = config["search_radius"]
         self._search_min_price = config["min_price"]
