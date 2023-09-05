@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/floorplans")
-    DATA_DIR = os.path.join(CURRENT_DIR, f"data/all postcodes/{DATE_FOLDER}")
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data_gh_actions/all postcodes/{DATE_FOLDER}")
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
 
