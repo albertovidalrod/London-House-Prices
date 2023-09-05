@@ -1,0 +1,5 @@
+search_radius: "1.0"
+min_price: "350000"
+max_price: "550000"
+min_bedrooms: "1"
+max_bedrooms: "3"

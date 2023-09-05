@@ -69,8 +69,8 @@ def iter_wrapper(session: Session, house) -> None:
     time.sleep(0.4)
 
 
-def main(postcode: str, garden_option: str, mode: str) -> None:
-    session = Session(mode)
+def main(postcode: str, garden_option: str, search_area: str) -> None:
+    session = Session(search_area)
     session.launch_browser_with_extension(CURRENT_DIR)
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
@@ -161,60 +161,60 @@ def main(postcode: str, garden_option: str, mode: str) -> None:
 
 if __name__ == "__main__":
     # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 3:
-        print("Incorrect number of inputs. Three inputs should be provided")
-    else:
-        # Convert command-line arguments to integers
-        postcode_list_str = sys.argv[1]
-        # Split the argument string into a list using the comma as a delimiter
-        postcode_list = postcode_list_str.split(",")
-        garden_list_str = sys.argv[2]
-        garden_option_list = garden_list_str.split(",")
-        mode = "extension"
+    # if len(sys.argv) != 3:
+    #     print("Incorrect number of inputs. Three inputs should be provided")
+    # else:
+    #     # Convert command-line arguments to integers
+    #     postcode_list_str = sys.argv[1]
+    #     # Split the argument string into a list using the comma as a delimiter
+    #     postcode_list = postcode_list_str.split(",")
+    #     garden_list_str = sys.argv[2]
+    #     garden_option_list = garden_list_str.split(",")
+    #     search_area = "north london"
 
-        # Define global variables
-        # Get the current month and create a folder to save the data
-        current_month = datetime.now().strftime("%B")
-        current_year = datetime.now().year
-        DATE_FOLDER = f"{current_month} {current_year}"
+    #     # Define global variables
+    #     # Get the current month and create a folder to save the data
+    #     current_month = datetime.now().strftime("%B")
+    #     current_year = datetime.now().year
+    #     DATE_FOLDER = f"{current_month} {current_year}"
 
-        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-        FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
-        HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
-        DATA_DIR = os.path.join(CURRENT_DIR, f"data/North London/{DATE_FOLDER}")
-        os.makedirs(DATA_DIR, exist_ok=True)
-        os.makedirs(FLOORPLANS_DIR, exist_ok=True)
-        os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
+    #     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    #     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
+    #     HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
+    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data/North London/{DATE_FOLDER}")
+    #     os.makedirs(DATA_DIR, exist_ok=True)
+    #     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
+    #     os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
 
-        for postcode in postcode_list:
-            for garden_option in garden_option_list:
-                # Call the main function with command-line arguments
-                main(postcode, garden_option, mode)
-
-    generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
-
-    # # Define global variables
-    # # Get the current month and create a folder to save the data
-    # current_month = datetime.now().strftime("%B")
-    # current_year = datetime.now().year
-    # DATE_FOLDER = f"{current_month} {current_year}"
-
-    # CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
-    # HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
-    # DATA_DIR = os.path.join(CURRENT_DIR, f"data/{DATE_FOLDER}")
-    # os.makedirs(DATA_DIR, exist_ok=True)
-
-    # # For debugging only
-    # # Convert command-line arguments to integers
-    # postcode_list = ["N193TX", "NW53AF", "N20PE"]
-    # # postcode_list = ["N20PE"]
-    # garden_option_list = ["Garden", "NoGarden"]
-    # mode = "extension"
+    #     for postcode in postcode_list:
+    #         for garden_option in garden_option_list:
+    #             # Call the main function with command-line arguments
+    #             main(postcode, garden_option, search_area)
 
     # generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
 
-    # for postcode in postcode_list:
-    #     for garden_option in garden_option_list:
-    #         # Call the main function with command-line arguments
-    #         main(postcode, garden_option, mode)
+    # Define global variables
+    # Get the current month and create a folder to save the data
+    current_month = datetime.now().strftime("%B")
+    current_year = datetime.now().year
+    DATE_FOLDER = f"{current_month} {current_year}"
+
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
+    HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data/North London/{DATE_FOLDER}")
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    # For debugging only
+    # Convert command-line arguments to integers
+    postcode_list = ["N193TX", "NW53AF", "N20PE"]
+    # postcode_list = ["N20PE"]
+    garden_option_list = ["Garden", "NoGarden"]
+    search_area = "north london"
+
+    for postcode in postcode_list:
+        for garden_option in garden_option_list:
+            # Call the main function with command-line arguments
+            main(postcode, garden_option, search_area)
+
+    generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
