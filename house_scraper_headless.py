@@ -97,7 +97,7 @@ def main(postcode: str, garden_option: str, search_area: str) -> None:
             print(f"Finished scraping {postcode} and {garden_option}")
             break
 
-    session.generate_and_save_dataframe(DATA_DIR, garden_option, postcode)
+    session.generate_and_save_dataframe(DATA_DIR, garden_option, postcode, search_area)
     session.driver.quit()
     del session
 

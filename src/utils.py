@@ -190,7 +190,7 @@ def extract_area_from_dataframe(size_str: str) -> float:
 
 
 def generate_scraping_metadata(
-    data_dir: str, postcode_list: list, garden_option_list: list
+    data_dir: str, postcode_list: list, garden_option_list: list, search_area: str
 ):
     current_date = datetime.now()
     current_year = current_date.strftime("%Y")
@@ -200,22 +200,31 @@ def generate_scraping_metadata(
     metadata_filename = f"{current_month}_{current_year}_scraping_metadata"
 
     files_generated = []
-    for postcode in postcode_list:
-        for garden_option in garden_option_list:
-            # Call the main function with command-line arguments
+    if search_area.casefold() == "north london".casefold():
+        for postcode in postcode_list:
+            for garden_option in garden_option_list:
+                # Call the main function with command-line arguments
 
-            if garden_option.casefold() == "garden".casefold():
-                garden_save_str = "garden"
-            else:
-                garden_save_str = "no_garden"
-            files_generated.append(f"house_data_{garden_save_str}_{postcode}")
+                if garden_option.casefold() == "garden".casefold():
+                    garden_save_str = "garden"
+                else:
+                    garden_save_str = "no_garden"
+                files_generated.append(f"house_data_{garden_save_str}_{postcode}")
+    elif search_area.casefold() == "all postcodes".casefold():
+        files_generated = [f"house_data_{postcode}" for postcode in postcode_list]
+    else:
+        raise ValueError(
+            "Invalid search area. Search area must be 'north london' or 'all postcodes'."
+        )
 
     metadata = {
         "creation_date": current_date_string,
         "postcodes": postcode_list,
-        "garden_options": garden_option_list,
-        "files_generated": files_generated,
     }
+    if search_area.casefold() == "north london".casefold():
+        metadata["garden_options"] = garden_option_list
+
+    metadata["files_generated"] = files_generated
 
     # Save the metadata to a JSON file
     metadata_path = data_dir + f"/{metadata_filename}.json"

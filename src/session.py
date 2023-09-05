@@ -31,7 +31,7 @@ class Session:
             config_file_name = "config_all_postcodes.yml"
         else:
             raise ValueError(
-                "Invalid mode. Mode must be 'north london' or 'all postcodes'."
+                "Invalid search area. Search area must be 'north london' or 'all postcodes'."
             )
 
         # Load the configuration from the YAML file
@@ -301,7 +301,7 @@ class Session:
             raise ValueError("Only instances of House can be added to the session")
 
     def generate_and_save_dataframe(
-        self, data_dir: str, garden_option: str, postcode: str
+        self, data_dir: str, garden_option: str, postcode: str, search_area: str
     ) -> None:
         data = {
             "id": [house.id for house in self.house_list],
@@ -334,14 +334,18 @@ class Session:
             ],
             "council_tax_band": [house.council_tax_band for house in self.house_list],
         }
-        if garden_option.casefold() == "garden".casefold():
+        if (garden_option.casefold() == "garden".casefold()) and (
+            search_area.casefold() == "north london".casefold()
+        ):
             garden_save_str = "garden"
-        else:
+            file_save_str = f"house_data_{garden_save_str}_{postcode}"
+        elif (garden_option.casefold() == "nogarden".casefold()) and (
+            search_area.casefold() == "north london".casefold()
+        ):
             garden_save_str = "no_garden"
+            file_save_str = f"house_data_{garden_save_str}_{postcode}"
+        else:
+            file_save_str = f"house_data_{postcode}"
         self.house_dataframe = pd.DataFrame(data)
-        self.house_dataframe.to_csv(
-            f"{data_dir}/house_data_{garden_save_str}_{postcode}.csv"
-        )
-        self.house_dataframe.to_parquet(
-            f"{data_dir}/house_data_{garden_save_str}_{postcode}.parquet"
-        )
+        self.house_dataframe.to_csv(f"{data_dir}/{file_save_str}.csv")
+        self.house_dataframe.to_parquet(f"{data_dir}/{file_save_str}.parquet")
