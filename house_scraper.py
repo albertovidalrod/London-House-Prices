@@ -1,6 +1,6 @@
 import time
 import os
-import sys
+import yaml
 
 # import chromedriver_autoinstaller
 
@@ -17,7 +17,7 @@ from src.utils import generate_scraping_metadata
 
 
 @timeout(10)
-def iter_wrapper(session: Session, house) -> None:
+def house_scraping_wrapper(session: Session, house: House) -> None:
     # Create an instance of the House class to store the scraped information
     house_instance = House()
 
@@ -69,8 +69,10 @@ def iter_wrapper(session: Session, house) -> None:
     time.sleep(0.4)
 
 
-def main(postcode: str, garden_option: str, search_area: str) -> None:
-    session = Session(search_area, CURRENT_DIR)
+def main(
+    postcode: str, garden_option: str, search_area: str, search_config: dict
+) -> None:
+    session = Session(search_config)
     session.launch_browser_with_extension(CURRENT_DIR)
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
@@ -82,7 +84,7 @@ def main(postcode: str, garden_option: str, search_area: str) -> None:
 
         for house in houses:
             try:
-                iter_wrapper(session, house)
+                house_scraping_wrapper(session, house)
             except TimeoutError:
                 print("Time out gathering data. Skipping to next house")
             # # Create an instance of the House class to store the scraped information
@@ -148,7 +150,7 @@ def main(postcode: str, garden_option: str, search_area: str) -> None:
                 EC.element_to_be_clickable(next_button_args)
             )
             session.driver.execute_script("arguments[0].click();", next_button)
-            time.sleep(1)
+            time.sleep(0.75)
 
         except:
             print(f"Finished scraping {postcode} and {garden_option}")
@@ -174,14 +176,11 @@ if __name__ == "__main__":
 
     #     # Define global variables
     #     # Get the current month and create a folder to save the data
-    #     current_month = datetime.now().strftime("%B")
-    #     current_year = datetime.now().year
-    #     DATE_FOLDER = f"{current_month} {current_year}"
-
+    #     DATE_FOLDER = datetime.now().strftime("%B %Y")
     #     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     #     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
     #     HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
-    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data/North London/{DATE_FOLDER}")
+    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data/{search_area}/{DATE_FOLDER}")
     #     os.makedirs(DATA_DIR, exist_ok=True)
     #     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
     #     os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
@@ -189,32 +188,47 @@ if __name__ == "__main__":
     #     for postcode in postcode_list:
     #         for garden_option in garden_option_list:
     #             # Call the main function with command-line arguments
-    #             main(postcode, garden_option, search_area)
+    #             main(postcode, garden_option, search_area, search_config)
 
     # generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
 
+    # For debugging only
+    # Convert command-line arguments to integers
+    # postcode_list = ["N193TX", "NW53AF", "N20PE"]
+    postcode_list = ["N20PE"]
+    garden_option_list = ["Garden"]
+    search_area = "all postcodes"
+
     # Define global variables
     # Get the current month and create a folder to save the data
-    current_month = datetime.now().strftime("%B")
-    current_year = datetime.now().year
-    DATE_FOLDER = f"{current_month} {current_year}"
-
+    DATE_FOLDER = datetime.now().strftime("%B %Y")
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media/floorplans")
     HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
-    DATA_DIR = os.path.join(CURRENT_DIR, f"data/North London/{DATE_FOLDER}")
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data/{search_area}/{DATE_FOLDER}")
     os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(FLOORPLANS_DIR, exist_ok=True)
+    os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
 
-    # For debugging only
-    # Convert command-line arguments to integers
-    postcode_list = ["N193TX", "NW53AF", "N20PE"]
-    # postcode_list = ["N20PE"]
-    garden_option_list = ["Garden", "NoGarden"]
-    search_area = "all postcodes"
+    # Load config file for the house search parameters depending on the search area
+    if search_area == "north london":
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_north_london.yml")
+    elif search_area == "all postcodes":
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
+    else:
+        raise ValueError(
+            "Invalid search area. Search area must be 'north london' or 'all postcodes'."
+        )
+
+    # Load the configuration from the YAML file
+    with open(config_file_path, "r") as config_file:
+        search_config = yaml.safe_load(config_file)
 
     for postcode in postcode_list:
         for garden_option in garden_option_list:
             # Call the main function with command-line arguments
-            main(postcode, garden_option, search_area)
+            main(postcode, garden_option, search_area, search_config)
 
-    generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
+    generate_scraping_metadata(
+        DATA_DIR, postcode_list, garden_option_list, search_area, search_config
+    )

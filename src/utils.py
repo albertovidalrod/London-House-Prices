@@ -190,7 +190,11 @@ def extract_area_from_dataframe(size_str: str) -> float:
 
 
 def generate_scraping_metadata(
-    data_dir: str, postcode_list: list, garden_option_list: list, search_area: str
+    data_dir: str,
+    postcode_list: list,
+    garden_option_list: list,
+    search_area: str,
+    search_config: dict,
 ):
     current_date = datetime.now()
     current_year = current_date.strftime("%Y")
@@ -204,7 +208,6 @@ def generate_scraping_metadata(
         for postcode in postcode_list:
             for garden_option in garden_option_list:
                 # Call the main function with command-line arguments
-
                 if garden_option.casefold() == "garden".casefold():
                     garden_save_str = "garden"
                 else:
@@ -219,12 +222,14 @@ def generate_scraping_metadata(
 
     metadata = {
         "creation_date": current_date_string,
+        "search_area": search_area,
         "postcodes": postcode_list,
     }
     if search_area.casefold() == "north london".casefold():
         metadata["garden_options"] = garden_option_list
 
     metadata["files_generated"] = files_generated
+    metadata["config_search"] = search_config
 
     # Save the metadata to a JSON file
     metadata_path = data_dir + f"/{metadata_filename}.json"

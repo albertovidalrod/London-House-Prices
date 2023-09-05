@@ -17,35 +17,14 @@ from src.house import House
 
 
 class Session:
-    def __init__(self, search_area: str, current_dir: str) -> None:
+    def __init__(self, search_config: dict) -> None:
         # Define the url from which the data will be scraped
         self.url = "https://www.rightmove.co.uk/property-for-sale.html"
 
+        # Store search config information
+        self._search_config = search_config
         # Get url information
         self.house_list = []
-
-        # Load config files depending on mode
-        if search_area == "north london":
-            config_file_path = os.path.join(
-                current_dir, "config/config_north_london.yml"
-            )
-        elif search_area == "all postcodes":
-            config_file_path = os.path.join(
-                current_dir, "config/config_all_postcodes.yml"
-            )
-        else:
-            raise ValueError(
-                "Invalid search area. Search area must be 'north london' or 'all postcodes'."
-            )
-
-        # Load the configuration from the YAML file
-        with open(config_file_path, "r") as config_file:
-            config = yaml.safe_load(config_file)
-        self._search_radius = config["search_radius"]
-        self._search_min_price = config["min_price"]
-        self._search_max_price = config["max_price"]
-        self._search_min_bedrooms = config["min_bedrooms"]
-        self._search_max_bedrooms = config["max_bedrooms"]
 
     def launch_browser_with_extension(self, current_dir: str) -> None:
         self.driver_service = Service(executable_path="/opt/homebrew/bin/chromedriver")
@@ -116,35 +95,35 @@ class Session:
             EC.element_to_be_clickable((By.ID, "radius"))
         )
         select_search_radius = Select(search_radius_element)
-        select_search_radius.select_by_value(self._search_radius)
+        select_search_radius.select_by_value(self._search_config["search_radius"])
 
         # Min price
         min_price_element = self.wait.until(
             EC.element_to_be_clickable((By.ID, "minPrice"))
         )
         select_min_price = Select(min_price_element)
-        select_min_price.select_by_value(self._search_min_price)
+        select_min_price.select_by_value(self._search_config["min_price"])
 
         # Max price
         max_price_element = self.wait.until(
             EC.element_to_be_clickable((By.ID, "maxPrice"))
         )
         select_max_price = Select(max_price_element)
-        select_max_price.select_by_value(self._search_max_price)
+        select_max_price.select_by_value(self._search_config["max_price"])
 
         # Min bedrooms
         min_bedrooms_element = self.wait.until(
             EC.element_to_be_clickable((By.ID, "minBedrooms"))
         )
         select_min_bedrooms = Select(min_bedrooms_element)
-        select_min_bedrooms.select_by_value(self._search_min_bedrooms)
+        select_min_bedrooms.select_by_value(self._search_config["min_bedrooms"])
 
         # Max bedrooms
         max_bedrooms_element = self.wait.until(
             EC.element_to_be_clickable((By.ID, "maxBedrooms"))
         )
         select_max_bedrooms = Select(max_bedrooms_element)
-        select_max_bedrooms.select_by_value(self._search_max_bedrooms)
+        select_max_bedrooms.select_by_value(self._search_config["max_bedrooms"])
 
         # self.wait until the find properties button is clickable and then click it
         find_properties_button_args = (By.ID, "submit")

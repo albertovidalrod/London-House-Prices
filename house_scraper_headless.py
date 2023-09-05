@@ -1,6 +1,6 @@
 import time
 import os
-import sys
+import yaml
 
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -64,8 +64,10 @@ def house_scraping_wrapper(session: Session, house: House) -> None:
     time.sleep(0.4)
 
 
-def main(postcode: str, garden_option: str, search_area: str) -> None:
-    session = Session(search_area)
+def main(
+    postcode: str, garden_option: str, search_area: str, search_config: dict
+) -> None:
+    session = Session(search_config)
     session.launch_browser_headless_mode()
     session.set_search_parameters(postcode, garden_option)
     time.sleep(0.75)
@@ -114,19 +116,17 @@ if __name__ == "__main__":
     #     postcode_list = postcode_list_str.split(",")
     #     garden_list_str = sys.argv[2]
     #     garden_option_list = garden_list_str.split(",")
+    #     search_area = "north london"
 
     #     # Define global variables
     #     # Get the current month and create a folder to save the data
-    #     current_month = datetime.now().strftime("%B")
-    #     current_year = datetime.now().year
-    #     DATE_FOLDER = f"{current_month} {current_year}"
-
+    #     DATE_FOLDER = datetime.now().strftime("%B %Y")
     #     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     #     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/floorplans")
     #     HOUSE_PICTURES_DIR = os.path.join(
     #         CURRENT_DIR, "media_gh_actions/house_pictures"
     #     )
-    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data_test/{DATE_FOLDER}")
+    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data_gh_actions/{search_area}/{DATE_FOLDER}")
     #     os.makedirs(DATA_DIR, exist_ok=True)
     #     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
     #     os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
@@ -134,21 +134,9 @@ if __name__ == "__main__":
     #     for postcode in postcode_list:
     #         for garden_option in garden_option_list:
     #             # Call the main function with command-line arguments
-    #             main(postcode, garden_option)
+    #             main(postcode, garden_option, search_area, search_config)
 
     # generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
-
-    # # Define global variables
-    # # Get the current month and create a folder to save the data
-    current_month = datetime.now().strftime("%B")
-    current_year = datetime.now().year
-    DATE_FOLDER = f"{current_month} {current_year}"
-
-    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/floorplans")
-    DATA_DIR = os.path.join(CURRENT_DIR, f"data_gh_actions/all postcodes/{DATE_FOLDER}")
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(FLOORPLANS_DIR, exist_ok=True)
 
     # For debugging only
     # Convert command-line arguments to integers
@@ -157,9 +145,33 @@ if __name__ == "__main__":
     garden_option_list = ["Garden"]
     search_area = "north london"
 
+    # Define global variables
+    # Get the current month and create a folder to save the data
+    DATE_FOLDER = datetime.now().strftime("%B %Y")
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    FLOORPLANS_DIR = os.path.join(CURRENT_DIR, "media_gh_actions/floorplans")
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data_gh_actions/{search_area}/{DATE_FOLDER}")
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(FLOORPLANS_DIR, exist_ok=True)
+    # Load config file for the house search parameters depending on the search area
+    if search_area == "north london":
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_north_london.yml")
+    elif search_area == "all postcodes":
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
+    else:
+        raise ValueError(
+            "Invalid search area. Search area must be 'north london' or 'all postcodes'."
+        )
+
+    # Load the configuration from the YAML file
+    with open(config_file_path, "r") as config_file:
+        search_config = yaml.safe_load(config_file)
+
     for postcode in postcode_list:
         for garden_option in garden_option_list:
             # Call the main function with command-line arguments
-            main(postcode, garden_option, search_area)
+            main(postcode, garden_option, search_area, search_config)
 
-    generate_scraping_metadata(DATA_DIR, postcode_list, garden_option_list)
+    generate_scraping_metadata(
+        DATA_DIR, postcode_list, garden_option_list, search_area, search_config
+    )

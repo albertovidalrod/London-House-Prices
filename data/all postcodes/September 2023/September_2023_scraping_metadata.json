@@ -1,12 +1,17 @@
 {
-    "creation_date": "04/09/2023",
+    "creation_date": "05/09/2023",
+    "search_area": "all postcodes",
     "postcodes": [
         "N20PE"
     ],
-    "garden_options": [
-        "Garden"
-    ],
     "files_generated": [
-        "house_data_garden_N20PE"
-    ]
+        "house_data_N20PE"
+    ],
+    "config_search": {
+        "search_radius": "3.0",
+        "min_price": "150000",
+        "max_price": "200000",
+        "min_bedrooms": "1",
+        "max_bedrooms": "5"
+    }
 }
