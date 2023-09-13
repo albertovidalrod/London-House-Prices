@@ -1,17 +1,16 @@
-import requests
-import time
 import os
-import yaml
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.select import Select
-from timeout_decorator import timeout
-
+import time
 
 import pandas as pd
+import requests
+import yaml
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from timeout_decorator import timeout
 
 from src.house import House
 
@@ -74,10 +73,10 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(cookie_button_args))
         self.driver.execute_script("arguments[0].click();", cookie_button)
 
-    def set_search_parameters(self, postcode: str, garden_option: str) -> None:
+    def set_search_parameters(
+        self, postcode: str, garden_option: str, search_area: str
+    ) -> None:
         # Find postcode field and search button
-        # postcode_element = self.driver.find_element(by=By.ID, value="searchLocation")
-        # search_button = self.driver.find_element(by=By.ID, value="search")
         postcode_element = self.driver.find_element(
             By.CLASS_NAME, value="ksc_typeAheadInputField"
         )
@@ -89,6 +88,7 @@ class Session:
         self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "ksc_button")))
         self.driver.execute_script("arguments[0].click();", search_button)
 
+        # time.sleep(0.1)
         # Select property features
         # Search area radius
         search_radius_element = self.wait.until(
@@ -174,13 +174,14 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(buy_scheme_args))
         self.driver.execute_script("arguments[0].click();", buy_scheme_option)
 
-        # Add reserved houses
-        checkbox_element = self.driver.find_element(
-            By.CSS_SELECTOR, 'label.includeStatus-checkbox[for="filters-sold-stc"]'
-        )
+        if search_area.casefold() == "north london".casefold():
+            # Add reserved houses
+            checkbox_element = self.driver.find_element(
+                By.CSS_SELECTOR, 'label.includeStatus-checkbox[for="filters-sold-stc"]'
+            )
 
-        # Click the checkbox to select it
-        checkbox_element.click()
+            # Click the checkbox to select it
+            checkbox_element.click()
 
         # Close filter menu
         close_filter_args = (
@@ -190,6 +191,17 @@ class Session:
         close_filter_button = self.driver.find_element(*close_filter_args)
         self.wait.until(EC.element_to_be_clickable(close_filter_args))
         self.driver.execute_script("arguments[0].click();", close_filter_button)
+
+        time.sleep(0.1)
+
+        if search_area.casefold() == "all postcodes".casefold():
+            sorting_element_args = (
+                By.ID,
+                "sortType",
+            )
+            sorting_element = self.driver.find_element(*sorting_element_args)
+            select_sorting = Select(sorting_element)
+            select_sorting.select_by_visible_text(self._search_config["sorting"])
 
     @timeout(10)
     def click_on_house(self, house_id: str) -> None:
@@ -283,7 +295,7 @@ class Session:
         else:
             raise ValueError("Only instances of House can be added to the session")
 
-    def generate_and_save_dataframe(
+    def save_house_dataframe(
         self, data_dir: str, garden_option: str, postcode: str, search_area: str
     ) -> None:
         data = {
@@ -292,10 +304,6 @@ class Session:
             "added_reduced": [house.added_reduced for house in self.house_list],
             "address": [house.address for house in self.house_list],
             "description": [house.description for house in self.house_list],
-            "price_change_date": [house.price_change_date for house in self.house_list],
-            "price_change_value": [
-                house.price_change_value for house in self.house_list
-            ],
             "type_house": [house.type_house for house in self.house_list],
             "bathrooms": [house.bathrooms for house in self.house_list],
             "bedrooms": [house.bedrooms for house in self.house_list],
@@ -329,6 +337,33 @@ class Session:
             file_save_str = f"house_data_{garden_save_str}_{postcode}"
         else:
             file_save_str = f"house_data_{postcode}"
+        self.house_dataframe = pd.DataFrame(data)
+        self.house_dataframe.to_csv(f"{data_dir}/{file_save_str}.csv")
+        self.house_dataframe.to_parquet(f"{data_dir}/{file_save_str}.parquet")
+
+    def save_price_change_dataframe(
+        self, data_dir: str, garden_option: str, postcode: str, search_area: str
+    ) -> None:
+        if search_area.casefold() != "north london".casefold():
+            raise ValueError(
+                "Invalid search area. Search area must be 'north london' - 'all postcodes' not allowed"
+            )
+
+        data = {
+            "id": [house.id for house in self.house_list],
+            "price": [house.price for house in self.house_list],
+            "price_change_date": [house.price_change_date for house in self.house_list],
+            "price_change_value": [
+                house.price_change_value for house in self.house_list
+            ],
+        }
+
+        if garden_option.casefold() == "garden".casefold():
+            garden_save_str = "garden"
+        elif garden_option.casefold() == "nogarden".casefold():
+            garden_save_str = "no_garden"
+
+        file_save_str = f"price_change_data_{garden_save_str}_{postcode}"
         self.house_dataframe = pd.DataFrame(data)
         self.house_dataframe.to_csv(f"{data_dir}/{file_save_str}.csv")
         self.house_dataframe.to_parquet(f"{data_dir}/{file_save_str}.parquet")

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+
 from bs4 import BeautifulSoup
 from timeout_decorator import timeout
 
@@ -42,6 +43,18 @@ class House:
         ).get_text()
         # Get house address
         self.address = house_ad_soup.find("address").get_text()
+        # Get house description
+        self.description = house_ad_soup.find("span", itemprop="description").get_text()
+
+    @timeout(10)
+    def scan_house_price_change(self, house_ad_html) -> None:
+        house_ad_soup = BeautifulSoup(house_ad_html, "html.parser")
+        # Get house id
+        self.id = house_ad_soup.find("div").get("id").split("-")[1]
+        # Get house price
+        self.price = house_ad_soup.find(
+            "div", class_="propertyCard-priceValue"
+        ).get_text()
         # Get the dates when the price has changed. This information is provided by a
         # a Chrome extension
         self.price_change_date = [
@@ -54,8 +67,6 @@ class House:
             element.get_text()
             for element in house_ad_soup.find_all("td", class_="pl-price-column")
         ]
-        # Get house description
-        self.description = house_ad_soup.find("span", itemprop="description").get_text()
 
     @timeout(5)
     def scan_house_page(self, house_page_html):

@@ -189,7 +189,7 @@ def extract_area_from_dataframe(size_str: str) -> float:
         return None
 
 
-def generate_scraping_metadata(
+def generate_house_scraping_metadata(
     data_dir: str,
     postcode_list: list,
     garden_option_list: list,
@@ -197,11 +197,10 @@ def generate_scraping_metadata(
     search_config: dict,
 ):
     current_date = datetime.now()
-    current_year = current_date.strftime("%Y")
-    current_month = current_date.strftime("%B")
+    current_date_filename = current_date.strftime("%d_%B_%Y")
     current_date_string = current_date.strftime("%d/%m/%Y")
 
-    metadata_filename = f"{current_month}_{current_year}_scraping_metadata"
+    metadata_filename = f"{current_date_filename}__house_scraping_metadata"
 
     files_generated = []
     if search_area.casefold() == "north london".casefold():
@@ -230,6 +229,51 @@ def generate_scraping_metadata(
 
     metadata["files_generated"] = files_generated
     metadata["config_search"] = search_config
+
+    # Save the metadata to a JSON file
+    metadata_path = data_dir + f"/{metadata_filename}.json"
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file, indent=4)
+
+
+def generate_price_change_scraping_metadata(
+    data_dir: str,
+    postcode_list: list,
+    garden_option_list: list,
+    search_area: str,
+    search_config: dict,
+):
+    current_date = datetime.now()
+    current_date_filename = current_date.strftime("%d_%B_%Y")
+    current_date_string = current_date.strftime("%d/%m/%Y")
+
+    metadata_filename = f"{current_date_filename}_price_change_scraping_metadata"
+
+    files_generated = []
+    if search_area.casefold() == "north london".casefold():
+        for postcode in postcode_list:
+            for garden_option in garden_option_list:
+                # Call the main function with command-line arguments
+                if garden_option.casefold() == "garden".casefold():
+                    garden_save_str = "garden"
+                else:
+                    garden_save_str = "no_garden"
+                files_generated.append(
+                    f"price_change_data_{garden_save_str}_{postcode}"
+                )
+    else:
+        raise ValueError(
+            "Invalid search area. Search area must be 'north london' - 'all postcodes' not allowed"
+        )
+
+    metadata = {
+        "creation_date": current_date_string,
+        "search_area": search_area,
+        "postcodes": postcode_list,
+        "garden_options": garden_option_list,
+        "files_generated": files_generated,
+        "config_search": search_config,
+    }
 
     # Save the metadata to a JSON file
     metadata_path = data_dir + f"/{metadata_filename}.json"

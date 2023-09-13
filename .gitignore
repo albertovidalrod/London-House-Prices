@@ -10,6 +10,7 @@ house_scraper_headless_local.py
 
 # Folders
 *__pycache__/
-media/
 media_test/
 data_test/
+archive/
+house_pictures_local/
