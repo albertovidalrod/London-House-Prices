@@ -1,5 +1,6 @@
 import os
 import time
+import sys
 from datetime import datetime
 
 import yaml
@@ -58,7 +59,7 @@ def house_scraping_wrapper(session: Session, house: House, search_area: str) -> 
     # Save the floorplan
     session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
 
-    if search_area.casefold() == "north london".casefold():
+    if search_area.casefold() == "area interest".casefold():
         # Save the house pictures
         session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
 
@@ -113,55 +114,18 @@ def main(
 
 
 if __name__ == "__main__":
-    # chromedriver_autoinstaller.install()
     # Check if the correct number of command-line arguments is provided
-    # if len(sys.argv) != 3:
-    #     print("Incorrect number of inputs. Three inputs should be provided")
-    # else:
-    #     # Convert command-line arguments to integers
-    #     postcode_list_str = sys.argv[1]
-    #     # Split the argument string into a list using the comma as a delimiter
-    #     postcode_list = postcode_list_str.split(",")
-    #     garden_list_str = sys.argv[2]
-    #     garden_option_list = garden_list_str.split(",")
-    #     search_area = "north london"
 
-    #     DATE_FOLDER = datetime.now().strftime("%B %Y")
-    #     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    #     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, f"media/floorplans/{search_area}")
-    #     DATA_DIR = os.path.join(CURRENT_DIR, f"data/{search_area}/{DATE_FOLDER}")
-    #     os.makedirs(DATA_DIR, exist_ok=True)
-    #     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
-    #     # Load config file for the house search parameters depending on the search area
-    #     if search_area.casefold() == "north london".casefold():
-    #         config_file_path = os.path.join(CURRENT_DIR, "config/config_north_london.yml")
-    #         HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
-    #         os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
-    #     elif search_area.casefold() == "all postcodes".casefold():
-    #         config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
-    #     else:
-    #         raise ValueError(
-    #             "Invalid search area. Search area must be 'north london' or 'all postcodes'."
-    #         )
+    # Convert command-line arguments to lists
+    # Split the argument string into a list using the comma as a delimiter
+    garden_list_str = sys.argv[1]
+    garden_option_list = garden_list_str.split(",")
+    search_area = sys.argv[2]
 
-    #     # Load the configuration from the YAML file
-    #     with open(config_file_path, "r") as config_file:
-    #         search_config = yaml.safe_load(config_file)
-
-    #     for postcode in postcode_list:
-    #         for garden_option in garden_option_list:
-    #             # Call the main function with command-line arguments
-    #             main(postcode, garden_option, search_area, search_config)
-
-    #     generate_house_scraping_metadata(
-    #         DATA_DIR, postcode_list, garden_option_list, search_area, search_config
-    #     )
-
-    # For debugging only
-    # Convert command-line arguments to integers
-    postcode_list = ["N20PE"]
-    garden_option_list = ["NoGarden"]
-    search_area = "all postcodes"
+    # # For debugging only
+    # # Convert command-line arguments to integers
+    # garden_option_list = ["NoGarden"]
+    # search_area = "all postcodes"
 
     # Define global variables
     # Get the current month and create a folder to save the data
@@ -172,20 +136,22 @@ if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(FLOORPLANS_DIR, exist_ok=True)
     # Load config file for the house search parameters depending on the search area
-    if search_area.casefold() == "north london".casefold():
-        config_file_path = os.path.join(CURRENT_DIR, "config/config_north_london.yml")
+    if search_area.casefold() == "area interest".casefold():
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_area_interest.yml")
         HOUSE_PICTURES_DIR = os.path.join(CURRENT_DIR, "media/house_pictures")
         os.makedirs(HOUSE_PICTURES_DIR, exist_ok=True)
     elif search_area.casefold() == "all postcodes".casefold():
         config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
     else:
         raise ValueError(
-            "Invalid search area. Search area must be 'north london' or 'all postcodes'."
+            "Invalid search area. Search area must be '' or 'all postcodes'."
         )
 
     # Load the configuration from the YAML file
     with open(config_file_path, "r") as config_file:
         search_config = yaml.safe_load(config_file)
+
+    postcode_list = [search_config["postcodes"][datetime.now().day]]
 
     for postcode in postcode_list:
         for garden_option in garden_option_list:

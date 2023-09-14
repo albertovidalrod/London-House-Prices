@@ -174,7 +174,7 @@ class Session:
         self.wait.until(EC.element_to_be_clickable(buy_scheme_args))
         self.driver.execute_script("arguments[0].click();", buy_scheme_option)
 
-        if search_area.casefold() == "north london".casefold():
+        if search_area.casefold() == "area interest".casefold():
             # Add reserved houses
             checkbox_element = self.driver.find_element(
                 By.CSS_SELECTOR, 'label.includeStatus-checkbox[for="filters-sold-stc"]'
@@ -326,12 +326,12 @@ class Session:
             "council_tax_band": [house.council_tax_band for house in self.house_list],
         }
         if (garden_option.casefold() == "garden".casefold()) and (
-            search_area.casefold() == "north london".casefold()
+            search_area.casefold() == "area interest".casefold()
         ):
             garden_save_str = "garden"
             file_save_str = f"house_data_{garden_save_str}_{postcode}"
         elif (garden_option.casefold() == "nogarden".casefold()) and (
-            search_area.casefold() == "north london".casefold()
+            search_area.casefold() == "area interest".casefold()
         ):
             garden_save_str = "no_garden"
             file_save_str = f"house_data_{garden_save_str}_{postcode}"
@@ -344,9 +344,9 @@ class Session:
     def save_price_change_dataframe(
         self, data_dir: str, garden_option: str, postcode: str, search_area: str
     ) -> None:
-        if search_area.casefold() != "north london".casefold():
+        if search_area.casefold() != "area interest".casefold():
             raise ValueError(
-                "Invalid search area. Search area must be 'north london' - 'all postcodes' not allowed"
+                "Invalid search area. Search area must be 'area interest' - 'all postcodes' not allowed"
             )
 
         data = {

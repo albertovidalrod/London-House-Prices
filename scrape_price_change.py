@@ -81,84 +81,49 @@ def main(
 
 if __name__ == "__main__":
     # Check if the correct number of command-line arguments is provided
-    if len(sys.argv) != 3:
-        print("Incorrect number of inputs. Three inputs should be provided")
-    else:
-        # Convert command-line arguments to integers
-        postcode_list_str = sys.argv[1]
-        # Split the argument string into a list using the comma as a delimiter
-        postcode_list = postcode_list_str.split(",")
-        garden_list_str = sys.argv[2]
-        garden_option_list = garden_list_str.split(",")
-        search_area = "north london"
-
-        # Define global variables
-        # Get the current month and create a folder to save the data
-        DATE_FOLDER = datetime.now().strftime("%B %Y")
-        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-        DATA_DIR = os.path.join(CURRENT_DIR, f"data/{search_area}/{DATE_FOLDER}")
-        os.makedirs(DATA_DIR, exist_ok=True)
-
-        # Load config file for the house search parameters depending on the search area
-        if search_area.casefold() == "north london".casefold():
-            config_file_path = os.path.join(
-                CURRENT_DIR, "config/config_north_london.yml"
-            )
-        elif search_area.casefold() == "all postcodes".casefold():
-            config_file_path = os.path.join(
-                CURRENT_DIR, "config/config_all_postcodes.yml"
-            )
-        else:
-            raise ValueError(
-                "Invalid search area. Search area must be 'north london' or 'all postcodes'."
-            )
-
-        # Load the configuration from the YAML file
-        with open(config_file_path, "r") as config_file:
-            search_config = yaml.safe_load(config_file)
-
-        for postcode in postcode_list:
-            for garden_option in garden_option_list:
-                # Call the main function with command-line arguments
-                main(postcode, garden_option, search_area, search_config)
-
-    generate_price_change_scraping_metadata(
-        DATA_DIR, postcode_list, garden_option_list, search_area, search_config
-    )
-
     # For debugging only
     # Convert command-line arguments to integers
     # postcode_list = ["N193TX", "NW53AF", "N20PE"]
     # postcode_list = ["N20PE"]
     # garden_option_list = ["Garden"]
-    # search_area = "north london"
+    # search_area = "area interest"
 
-    # # Define global variables
-    # # Get the current month and create a folder to save the data
-    # DATE_FOLDER = datetime.now().strftime("%B %Y")
-    # CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-    # DATA_DIR = os.path.join(CURRENT_DIR, f"data_test/{search_area}/{DATE_FOLDER}")
-    # os.makedirs(DATA_DIR, exist_ok=True)
+    # Convert command-line arguments to integers
+    # postcode_list_str = sys.argv[1]
+    # Split the argument string into a list using the comma as a delimiter
+    # postcode_list = postcode_list_str.split(",")
+    garden_list_str = sys.argv[1]
+    garden_option_list = garden_list_str.split(",")
+    search_area = sys.argv[2]
 
-    # # Load config file for the house search parameters depending on the search area
-    # if search_area.casefold() == "north london".casefold():
-    #     config_file_path = os.path.join(CURRENT_DIR, "config/config_north_london.yml")
-    # elif search_area.casefold() == "all postcodes".casefold():
-    #     config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
-    # else:
-    #     raise ValueError(
-    #         "Invalid search area. Search area must be 'north london' or 'all postcodes'."
-    #     )
+    # Define global variables
+    # Get the current month and create a folder to save the data
+    DATE_FOLDER = datetime.now().strftime("%B %Y")
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    DATA_DIR = os.path.join(CURRENT_DIR, f"data/{search_area}/{DATE_FOLDER}")
+    os.makedirs(DATA_DIR, exist_ok=True)
 
-    # # Load the configuration from the YAML file
-    # with open(config_file_path, "r") as config_file:
-    #     search_config = yaml.safe_load(config_file)
+    # Load config file for the house search parameters depending on the search area
+    if search_area.casefold() == "area interest".casefold():
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_area_interest.yml")
+    elif search_area.casefold() == "all postcodes".casefold():
+        config_file_path = os.path.join(CURRENT_DIR, "config/config_all_postcodes.yml")
+    else:
+        raise ValueError(
+            "Invalid search area. Search area must be 'area interest' or 'all postcodes'."
+        )
 
-    # for postcode in postcode_list:
-    #     for garden_option in garden_option_list:
-    #         # Call the main function with command-line arguments
-    #         main(postcode, garden_option, search_area, search_config)
+    # Load the configuration from the YAML file
+    with open(config_file_path, "r") as config_file:
+        search_config = yaml.safe_load(config_file)
 
-    # generate_price_change_scraping_metadata(
-    #     DATA_DIR, postcode_list, garden_option_list, search_area, search_config
-    # )
+    postcode_list = [search_config["postcodes"][datetime.now().day]]
+
+    for postcode in postcode_list:
+        for garden_option in garden_option_list:
+            # Call the main function with command-line arguments
+            main(postcode, garden_option, search_area, search_config)
+
+generate_price_change_scraping_metadata(
+    DATA_DIR, postcode_list, garden_option_list, search_area, search_config
+)

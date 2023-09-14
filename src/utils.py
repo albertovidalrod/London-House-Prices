@@ -114,8 +114,8 @@ def extract_other_data_from_floorplan(image_id: str = None) -> str:
         return (None, None)
 
 
-def extract_area_from_floorplan(image_id: str = None) -> float:
-    image_path = f"media/floorplans/{image_id}_floorplan.png"
+def extract_area_from_floorplan(image_id: str, search_area: str) -> float:
+    image_path = f"media/floorplans/{search_area}/{image_id}_floorplan.png"
     try:
         image = Image.open(image_path)
 
@@ -203,7 +203,7 @@ def generate_house_scraping_metadata(
     metadata_filename = f"{current_date_filename}__house_scraping_metadata"
 
     files_generated = []
-    if search_area.casefold() == "north london".casefold():
+    if search_area.casefold() == "area interest".casefold():
         for postcode in postcode_list:
             for garden_option in garden_option_list:
                 # Call the main function with command-line arguments
@@ -216,7 +216,7 @@ def generate_house_scraping_metadata(
         files_generated = [f"house_data_{postcode}" for postcode in postcode_list]
     else:
         raise ValueError(
-            "Invalid search area. Search area must be 'north london' or 'all postcodes'."
+            "Invalid search area. Search area must be 'area interest' or 'all postcodes'."
         )
 
     metadata = {
@@ -224,7 +224,7 @@ def generate_house_scraping_metadata(
         "search_area": search_area,
         "postcodes": postcode_list,
     }
-    if search_area.casefold() == "north london".casefold():
+    if search_area.casefold() == "area interest".casefold():
         metadata["garden_options"] = garden_option_list
 
     metadata["files_generated"] = files_generated
@@ -250,7 +250,7 @@ def generate_price_change_scraping_metadata(
     metadata_filename = f"{current_date_filename}_price_change_scraping_metadata"
 
     files_generated = []
-    if search_area.casefold() == "north london".casefold():
+    if search_area.casefold() == "area interest".casefold():
         for postcode in postcode_list:
             for garden_option in garden_option_list:
                 # Call the main function with command-line arguments
@@ -263,7 +263,7 @@ def generate_price_change_scraping_metadata(
                 )
     else:
         raise ValueError(
-            "Invalid search area. Search area must be 'north london' - 'all postcodes' not allowed"
+            "Invalid search area. Search area must be 'area interest' - 'all postcodes' not allowed"
         )
 
     metadata = {
