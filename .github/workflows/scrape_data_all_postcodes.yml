@@ -8,6 +8,10 @@ jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
+      - name: Get current date
+        id: get_date
+        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        
       - name: Checking out repo
         uses: actions/checkout@v3
         
@@ -35,5 +39,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Testing selenium in GH actions"
+          git commit -m "Data update ${{ steps.get_date.outputs.date}} - All postcodes"
           git push
