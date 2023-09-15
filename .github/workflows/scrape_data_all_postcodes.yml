@@ -4,10 +4,14 @@ on:
       - cron: 0 9 13-28 * *
   workflow_dispatch:
 
+env: 
+  SEARCH_AREA: " all postcodes"
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
     steps:
+
       - name: Get current date
         id: get_date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
@@ -32,12 +36,14 @@ jobs:
           pip install -r requirements.txt
 
       - name: Running the Python script
-        run: python house_scraper_headless.py NoGarden "all postcodes"
+        run: |
+          python house_scraper_headless.py NoGarden "${{ env.SEARCH_AREA }}"
+          python src/clean_data.py "${{ env.SEARCH_AREA }}"
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Data update ${{ steps.get_date.outputs.date}} - All postcodes"
+          git commit -m "Data update ${{ steps.get_date.outputs.date}} - ${{ env.SEARCH_AREA }}"
           git push
