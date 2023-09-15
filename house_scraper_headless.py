@@ -1,6 +1,7 @@
+import argparse
 import os
-import time
 import sys
+import time
 from datetime import datetime
 
 import yaml
@@ -114,18 +115,22 @@ def main(
 
 
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
-
-    # Convert command-line arguments to lists
-    # Split the argument string into a list using the comma as a delimiter
-    garden_list_str = sys.argv[1]
-    garden_option_list = garden_list_str.split(",")
-    search_area = sys.argv[2]
-
-    # # For debugging only
-    # # Convert command-line arguments to integers
-    # garden_option_list = ["NoGarden"]
-    # search_area = "all postcodes"
+    # Parse the arguments and assign them to variables
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--search_area",
+        type=str,
+        choices=["all postcodes", "area interest"],
+        help="Specify the search area. Only 'all postcodes' and 'area interest' are available",
+    )
+    parser.add_argument(
+        "-g", "--garden_list", type=str, help="Specify the garden options"
+    )
+    args = parser.parse_args()
+    search_area = args.search_area
+    garden_list = args.garden_list
+    garden_option_list = garden_list.split(",")
 
     # Define global variables
     # Get the current month and create a folder to save the data

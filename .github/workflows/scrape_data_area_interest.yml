@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 env: 
-  SEARCH_AREA: " all postcodes"
+  SEARCH_AREA: "area interest"
 
 jobs:
   scrape:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Running the Python script
         run: |
-          python house_scraper_headless.py Garden,NoGarden "${{ env.SEARCH_AREA }}"
+          python house_scraper_headless.py -g Garden,NoGarden -s "${{ env.SEARCH_AREA }}"
           python src/clean_data.py "${{ env.SEARCH_AREA }}"
         
       - name: Commit and Push The Results From Python Selenium Action

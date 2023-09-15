@@ -1,20 +1,19 @@
-import time
+import argparse
 import os
-import sys
-import yaml
-
-# import chromedriver_autoinstaller
-
-from bs4 import BeautifulSoup
+import time
 from datetime import datetime
+
+import yaml
+from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from timeout_decorator import timeout, TimeoutError
+from timeout_decorator import TimeoutError, timeout
 
-
-from src.session import Session
 from src.house import House
+from src.session import Session
 from src.utils import generate_price_change_scraping_metadata
+
+# import chromedriver_autoinstaller
 
 
 @timeout(10)
@@ -80,21 +79,22 @@ def main(
 
 
 if __name__ == "__main__":
-    # Check if the correct number of command-line arguments is provided
-    # For debugging only
-    # Convert command-line arguments to integers
-    # postcode_list = ["N193TX", "NW53AF", "N20PE"]
-    # postcode_list = ["N20PE"]
-    # garden_option_list = ["Garden"]
-    # search_area = "area interest"
-
-    # Convert command-line arguments to integers
-    # postcode_list_str = sys.argv[1]
-    # Split the argument string into a list using the comma as a delimiter
-    # postcode_list = postcode_list_str.split(",")
-    garden_list_str = sys.argv[1]
-    garden_option_list = garden_list_str.split(",")
-    search_area = sys.argv[2]
+    # Parse the arguments and assign them to variables
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-s",
+        "--search_area",
+        type=str,
+        choices=["all postcodes", "area interest"],
+        help="Specify the search area. Only 'all postcodes' and 'area interest' are available",
+    )
+    parser.add_argument(
+        "-g", "--garden_list", type=str, help="Specify the garden options"
+    )
+    args = parser.parse_args()
+    search_area = args.search_area
+    garden_list = args.garden_list
+    garden_option_list = garden_list.split(",")
 
     # Define global variables
     # Get the current month and create a folder to save the data
