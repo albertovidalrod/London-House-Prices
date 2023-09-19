@@ -324,6 +324,7 @@ class Session:
                 house.tenure_lease_length for house in self.house_list
             ],
             "council_tax_band": [house.council_tax_band for house in self.house_list],
+            "sold_under_offer": [house.sold_under_offer for house in self.house_list],
         }
         if (garden_option.casefold() == "garden".casefold()) and (
             search_area.casefold() == "area interest".casefold()

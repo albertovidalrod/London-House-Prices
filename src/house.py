@@ -25,6 +25,7 @@ class House:
     tenure_annual_service_charge: str = "Ask agent"
     tenure_lease_length: str = "Ask agent"
     council_tax_band: str = "Ask agent"
+    sold_under_offer: str = False
 
     @timeout(5)
     def scan_house_ad(self, house_ad_html) -> None:
@@ -45,6 +46,21 @@ class House:
         self.address = house_ad_soup.find("address").get_text()
         # Get house description
         self.description = house_ad_soup.find("span", itemprop="description").get_text()
+
+        # Find the element with the specified class and data-test attribute
+        sold_under_offer_element = house_ad_soup.find(
+            "span",
+            {
+                "class": "ksc_lozenge berry propertyCard-tagTitle propertyCard-tagTitle--show",
+                "data-test": "property-status",
+            },
+        )
+
+        # Check if the element exists
+        if sold_under_offer_element:
+            self.sold_under_offer = True
+        else:
+            self.sold_under_offer = False
 
     @timeout(10)
     def scan_house_price_change(self, house_ad_html) -> None:
@@ -125,26 +141,3 @@ class House:
         council_tax_element = house_soup.find("p", class_="_1VOsciKYew6xj3RWxMv_6J")
         if council_tax_element:
             self.council_tax_band = council_tax_element.get_text()
-
-    def assert_attrs(
-        self,
-        id,
-        price,
-        added_reduced,
-        address,
-        price_change_date,
-        price_change_value,
-        description,
-    ) -> None:
-        if (
-            self.id == id
-            and self.price == price
-            and self.added_reduced == added_reduced
-            and self.address == address
-            and self.price_change_date == price_change_date
-            and self.price_change_value == price_change_value
-            and self.description == description
-        ):
-            print("True")
-        else:
-            print("False")
