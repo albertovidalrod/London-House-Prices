@@ -29,10 +29,16 @@ if __name__ == "__main__":
         choices=["all postcodes", "area interest"],
         help="Specify the search area. Only 'all postcodes' and 'area interest' are available",
     )
+    parser.add_argument(
+        "-p",
+        "--platform",
+        type=str,
+        choices=["local", "github"],
+        help="Specify the platform where the script will run",
+    )
     args = parser.parse_args()
     search_area = args.search_area
-    # search_area = sys.argv[1]
-    # search_area = "all postcodes"
+    platform = args.platform
 
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, f"../media/floorplans/{search_area}")
@@ -42,13 +48,18 @@ if __name__ == "__main__":
     floorplans = [file for file in floorplans if file != ".DS_Store"]
     floorplan_id = [file.split("_")[0] for file in floorplans]
 
-    # Create a list of Dask delayed objects
-    delayed_results = [
-        dask_extract_area_from_floorplan(id, search_area) for id in floorplan_id
-    ]
+    if platform == "local":
+        # Create a list of Dask delayed objects
+        delayed_results = [
+            dask_extract_area_from_floorplan(id, search_area) for id in floorplan_id
+        ]
 
-    # Compute the results to trigger the computation
-    floor_size = list(dask.compute(*delayed_results))
+        # Compute the results to trigger the computation
+        floor_size = list(dask.compute(*delayed_results))
+    else:
+        floor_size = [
+            extract_area_from_floorplan(id, search_area) for id in floorplan_id
+        ]
 
     # Create dataframe and save it
     data = {"id": floorplan_id, "size": floor_size}
