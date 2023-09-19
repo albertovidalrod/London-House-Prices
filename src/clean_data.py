@@ -61,8 +61,8 @@ if __name__ == "__main__":
     else:
         all_df = pd.DataFrame(data)
 
-    all_df.to_csv(f"{DATA_DIR}/all_floor_size.csv", index=False)
-    all_df.to_parquet(f"{DATA_DIR}/all_floor_size.parquet")
+    all_df.to_csv(f"{DATA_DIR}/all_floor_size_2.csv", index=False)
+    all_df.to_parquet(f"{DATA_DIR}/all_floor_size_2.parquet")
 
     # Delete floorplans
     # for file in floorplans:
