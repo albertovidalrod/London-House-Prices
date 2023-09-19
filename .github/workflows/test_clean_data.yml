@@ -39,5 +39,5 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Data update ${{ steps.get_date.outputs.date}} - ${{ env.SEARCH_AREA }}"
+          git commit -m "Testing clean_data.py"
           git push
