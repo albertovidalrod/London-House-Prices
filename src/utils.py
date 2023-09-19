@@ -114,8 +114,8 @@ def extract_other_data_from_floorplan(image_id: str = None) -> str:
         return (None, None)
 
 
-def extract_area_from_floorplan(image_id: str, search_area: str) -> float:
-    image_path = f"media/floorplans/{search_area}/{image_id}_floorplan.png"
+def extract_area_from_floorplan(image_id: str, floorplans_dir: str) -> float:
+    image_path = f"{floorplans_dir}/{image_id}_floorplan.png"
     try:
         image = Image.open(image_path)
 
