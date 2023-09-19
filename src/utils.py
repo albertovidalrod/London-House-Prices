@@ -159,6 +159,7 @@ def extract_area_from_floorplan(image_id: str, floorplans_dir: str) -> float:
         else:
             return None
     except:
+        print("I'm here")
         return None
 
 

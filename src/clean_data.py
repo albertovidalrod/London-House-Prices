@@ -48,21 +48,19 @@ if __name__ == "__main__":
     floorplans = [file for file in floorplans if file != ".DS_Store"]
     floorplan_id = [file.split("_")[0] for file in floorplans]
 
-    # if platform == "local":
-    # Create a list of Dask delayed objects
-    delayed_results = [
-        dask_extract_area_from_floorplan(id, FLOORPLANS_DIR) for id in floorplan_id
-    ]
+    if platform == "local":
+        # Create a list of Dask delayed objects
+        delayed_results = [
+            dask_extract_area_from_floorplan(id, FLOORPLANS_DIR) for id in floorplan_id
+        ]
 
-    # Compute the results to trigger the computation
-    floor_size = list(dask.compute(*delayed_results))
-    # else:
-    #     floor_size = []
-    #     for i, id in enumerate(floorplan_id):
-    #         floor_size.append(extract_area_from_floorplan(id, FLOORPLANS_DIR))
-    # floor_size = [
-    #     extract_area_from_floorplan(id, search_area) for id in floorplan_id
-    # ]
+        # Compute the results to trigger the computation
+        floor_size = list(dask.compute(*delayed_results))
+    else:
+        floor_size = []
+        for i, id in enumerate(floorplan_id):
+            floor_size.append(extract_area_from_floorplan(id, FLOORPLANS_DIR))
+    # floor_size = [extract_area_from_floorplan(id, search_area) for id in floorplan_id]
 
     # Create dataframe and save it
     data = {"id": floorplan_id, "size": floor_size}
