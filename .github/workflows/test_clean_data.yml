@@ -27,7 +27,7 @@ jobs:
       - name: Install tesseract
         run: |
          sudo apt-get update
-         sudo apt-get install libleptonica-dev tesseract-ocr tesseract-ocr-dev libtesseract-dev python3-pil tesseract-ocr-eng tesseract-ocr-script-latn
+         sudo apt-get install tesseract-ocr
     
 
       - name: install python packages
