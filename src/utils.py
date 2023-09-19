@@ -116,51 +116,51 @@ def extract_other_data_from_floorplan(image_id: str = None) -> str:
 
 def extract_area_from_floorplan(image_id: str, floorplans_dir: str) -> float:
     image_path = f"{floorplans_dir}/{image_id}_floorplan.png"
-    try:
-        image = Image.open(image_path)
+    # try:
+    image = Image.open(image_path)
 
-        # Perform OCR using PyTesseract
-        extracted_text = pytesseract.image_to_string(image)
-        extracted_text = extracted_text.lower()
+    # Perform OCR using PyTesseract
+    extracted_text = pytesseract.image_to_string(image)
+    extracted_text = extracted_text.lower()
 
-        patterns = [
-            r"(\d+(\.\d+)?)\s*(?:ft\?|ft2?)",
-            r"(\d+(\.\d+)?)\s*sq\.?\s*ft\.?",
-            r"(\d+(\.\d+)?)\s*sq\.?\s*feet",
-            r"(\d+(\.\d+)?)\s*sqft",
-            r"(\d+(\.\d+)?)\s*saft",  # extracted text in winworths floorplans says "saft"
-            r"(\d+(\.\d+)?)\s*sqt",  # extracted text in 131536022 floorplan says "sqt"
-            r"(\d+(\.\d+)?)\s*sa\.?\s*ft\.?",
-            r"(\d+(\.\d+)?)\s*sa\.?\s*feet",
-            r"(\d+(\.\d+)?)\s*sq\.?\s*teet",
-        ]
+    patterns = [
+        r"(\d+(\.\d+)?)\s*(?:ft\?|ft2?)",
+        r"(\d+(\.\d+)?)\s*sq\.?\s*ft\.?",
+        r"(\d+(\.\d+)?)\s*sq\.?\s*feet",
+        r"(\d+(\.\d+)?)\s*sqft",
+        r"(\d+(\.\d+)?)\s*saft",  # extracted text in winworths floorplans says "saft"
+        r"(\d+(\.\d+)?)\s*sqt",  # extracted text in 131536022 floorplan says "sqt"
+        r"(\d+(\.\d+)?)\s*sa\.?\s*ft\.?",
+        r"(\d+(\.\d+)?)\s*sa\.?\s*feet",
+        r"(\d+(\.\d+)?)\s*sq\.?\s*teet",
+    ]
 
-        # Find all matches and store the numbers
-        numbers_before_sqft_set = set()
+    # Find all matches and store the numbers
+    numbers_before_sqft_set = set()
 
-        for pattern in patterns:
-            matches = re.finditer(pattern, extracted_text)
-            for match in matches:
-                numbers_before_sqft_set.add(match.group(1))
+    for pattern in patterns:
+        matches = re.finditer(pattern, extracted_text)
+        for match in matches:
+            numbers_before_sqft_set.add(match.group(1))
 
-        numbers_before_sqft = list(numbers_before_sqft_set)
+    numbers_before_sqft = list(numbers_before_sqft_set)
 
-        if numbers_before_sqft:
-            sorted_numbers = sorted(numbers_before_sqft, key=lambda x: float(x))
-            if len(sorted_numbers) > 1:
-                last_values = sorted_numbers[-2:]
+    if numbers_before_sqft:
+        sorted_numbers = sorted(numbers_before_sqft, key=lambda x: float(x))
+        if len(sorted_numbers) > 1:
+            last_values = sorted_numbers[-2:]
 
-                if float(last_values[-2]) / float(last_values[-1]) < 0.35:
-                    return last_values[-1]
-                else:
-                    return last_values[-2]
+            if float(last_values[-2]) / float(last_values[-1]) < 0.35:
+                return last_values[-1]
             else:
-                return sorted_numbers[-1]
+                return last_values[-2]
         else:
-            return None
-    except:
-        print("I'm here")
+            return sorted_numbers[-1]
+    else:
         return None
+    # except:
+    #     print("I'm here")
+    #     return None
 
 
 def find_postcode(road: str) -> str:
