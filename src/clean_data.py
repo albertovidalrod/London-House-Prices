@@ -29,16 +29,8 @@ if __name__ == "__main__":
         choices=["all postcodes", "area interest"],
         help="Specify the search area. Only 'all postcodes' and 'area interest' are available",
     )
-    parser.add_argument(
-        "-p",
-        "--platform",
-        type=str,
-        choices=["local", "github"],
-        help="Specify the platform where the script will run",
-    )
     args = parser.parse_args()
     search_area = args.search_area
-    platform = args.platform
 
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     FLOORPLANS_DIR = os.path.join(CURRENT_DIR, f"../media/floorplans/{search_area}")
@@ -48,19 +40,13 @@ if __name__ == "__main__":
     floorplans = [file for file in floorplans if file != ".DS_Store"]
     floorplan_id = [file.split("_")[0] for file in floorplans]
 
-    if platform == "local":
-        # Create a list of Dask delayed objects
-        delayed_results = [
-            dask_extract_area_from_floorplan(id, FLOORPLANS_DIR) for id in floorplan_id
-        ]
+    # Create a list of Dask delayed objects
+    delayed_results = [
+        dask_extract_area_from_floorplan(id, FLOORPLANS_DIR) for id in floorplan_id
+    ]
 
-        # Compute the results to trigger the computation
-        floor_size = list(dask.compute(*delayed_results))
-    else:
-        floor_size = []
-        for i, id in enumerate(floorplan_id):
-            floor_size.append(extract_area_from_floorplan(id, FLOORPLANS_DIR))
-    # floor_size = [extract_area_from_floorplan(id, search_area) for id in floorplan_id]
+    # Compute the results to trigger the computation
+    floor_size = list(dask.compute(*delayed_results))
 
     # Create dataframe and save it
     data = {"id": floorplan_id, "size": floor_size}
@@ -73,10 +59,10 @@ if __name__ == "__main__":
     else:
         all_df = pd.DataFrame(data)
 
-    all_df.to_csv(f"{DATA_DIR}/all_floor_size_2.csv", index=False)
-    all_df.to_parquet(f"{DATA_DIR}/all_floor_size_2.parquet")
+    all_df.to_csv(f"{DATA_DIR}/all_floor_size.csv", index=False)
+    all_df.to_parquet(f"{DATA_DIR}/all_floor_size.parquet")
 
     # Delete floorplans
-    # for file in floorplans:
-    #     os.remove(f"{FLOORPLANS_DIR}/{file}")
-    # os.rmdir(f"media/floorplans/{search_area}")
+    for file in floorplans:
+        os.remove(f"{FLOORPLANS_DIR}/{file}")
+    os.rmdir(f"media/floorplans/{search_area}")

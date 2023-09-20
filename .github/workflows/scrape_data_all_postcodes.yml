@@ -37,7 +37,7 @@ jobs:
       - name: Running the Python script
         run: |
           python house_scraper_headless.py -g NoGarden -s "${{ env.SEARCH_AREA }}"
-          # python src/clean_data.py -s "${{ env.SEARCH_AREA }}"
+          python src/clean_data.py -s "${{ env.SEARCH_AREA }}"
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
