@@ -37,7 +37,7 @@ jobs:
 
       - name: Running the Python script
         run: |
-          python src/clean_data.py -s "${{ env.SEARCH_AREA }}" -p "github"
+          python src/clean_data.py -s "${{ env.SEARCH_AREA }}" -p "local"
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
