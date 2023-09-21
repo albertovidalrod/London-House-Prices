@@ -67,7 +67,7 @@ def main(
                 EC.element_to_be_clickable(next_button_args)
             )
             session.driver.execute_script("arguments[0].click();", next_button)
-            time.sleep(0.75)
+            time.sleep(1.5)
 
         except:
             print(f"Finished scraping {postcode} and {garden_option}")

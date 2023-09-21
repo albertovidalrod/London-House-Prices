@@ -62,7 +62,7 @@ if __name__ == "__main__":
     all_df.to_csv(f"{DATA_DIR}/all_floor_size.csv", index=False)
     all_df.to_parquet(f"{DATA_DIR}/all_floor_size.parquet")
 
-    # Delete floorplans
-    for file in floorplans:
-        os.remove(f"{FLOORPLANS_DIR}/{file}")
-    os.rmdir(f"media/floorplans/{search_area}")
+    # # Delete floorplans
+    # for file in floorplans:
+    #     os.remove(f"{FLOORPLANS_DIR}/{file}")
+    # os.rmdir(f"media/floorplans/{search_area}")

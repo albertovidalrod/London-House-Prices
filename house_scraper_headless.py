@@ -60,9 +60,9 @@ def house_scraping_wrapper(session: Session, house: House, search_area: str) -> 
     # Save the floorplan
     session.save_house_floorplan(FLOORPLANS_DIR, house_instance.id)
 
-    if search_area.casefold() == "area interest".casefold():
-        # Save the house pictures
-        session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
+    # if search_area.casefold() == "area interest".casefold():
+    #     # Save the house pictures
+    #     session.save_house_pictures(HOUSE_PICTURES_DIR, house_instance.id)
 
     # Go back to the search results page
     session.driver.back()
