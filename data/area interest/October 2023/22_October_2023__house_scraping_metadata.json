@@ -1,0 +1,32 @@
+{
+    "creation_date": "22/10/2023",
+    "search_area": "area interest",
+    "postcodes": [
+        "NW117RN"
+    ],
+    "garden_options": [
+        "Garden",
+        "NoGarden"
+    ],
+    "files_generated": [
+        "house_data_garden_NW117RN",
+        "house_data_no_garden_NW117RN"
+    ],
+    "config_search": {
+        "search_radius": "1.0",
+        "min_price": "350000",
+        "max_price": "550000",
+        "min_bedrooms": "1",
+        "max_bedrooms": "3",
+        "postcodes": {
+            "21": "SW40HY",
+            "22": "NW117RN",
+            "23": "NW101NU",
+            "24": "NW53AF",
+            "25": "NW36LU",
+            "26": "NW34TG",
+            "27": "N193TX",
+            "28": "N20PE"
+        }
+    }
+}
