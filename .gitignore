@@ -15,3 +15,5 @@ data_test/
 archive/
 house_pictures_local/
 .vscode/
+.venv/
+venv/

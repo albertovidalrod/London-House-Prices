@@ -1,11 +1,12 @@
-import re
-import pytesseract
-import geocoder
-import os
 import json
+import os
+import re
 from datetime import datetime
-from PIL import Image
-from PIL import UnidentifiedImageError
+
+import geocoder
+import pytesseract
+from geopy.geocoders import Nominatim
+from PIL import Image, UnidentifiedImageError
 
 
 def floorplan_includes_garden(image_id: str = None) -> str:
@@ -192,6 +193,35 @@ def extract_area_from_dataframe(size_str: str) -> float:
         return None
 
 
+def extract_postcode(address: str):
+    # Define a regular expression pattern to match UK postcodes
+    postcode_pattern = r"\b([A-Z]{1,2}\d{1,2}[A-Z]?)\b"
+
+    # Search for the postcode pattern in the address
+    postcode_match = re.search(postcode_pattern, address)
+
+    # Check if a postcode was found
+    if postcode_match:
+        postcode = postcode_match.group()
+    else:
+        postcode = None
+    return postcode
+
+
+def extract_address_and_postcode(address: str):
+    # initialize Nominatim API
+    geolocator = Nominatim(user_agent="geoapiExercises")
+
+    location = geolocator.geocode(address)
+    if location:
+        data = location.raw
+        postcode = extract_postcode(data["display_name"])
+    else:
+        postcode = None
+    # print(postcode)
+    return postcode
+
+
 def generate_house_scraping_metadata(
     data_dir: str,
     postcode_list: list,
@@ -282,3 +312,35 @@ def generate_price_change_scraping_metadata(
     metadata_path = data_dir + f"/{metadata_filename}.json"
     with open(metadata_path, "w") as file:
         json.dump(metadata, file, indent=4)
+
+
+def extract_price_change(price_change_array):
+    if price_change_array.size == 0:
+        price_difference = None
+        percentage_difference = None
+    elif price_change_array.size == 1:
+        price_difference = 0
+        percentage_difference = 0
+    else:
+        last_values = []
+        for value in price_change_array:
+            try:
+                # Define a regular expression pattern to match numbers after £ symbol
+                pattern = r"£(\d+,\d+)"
+
+                # Use re.findall to find all matches of the pattern in the input string
+                matches = re.findall(pattern, value)
+
+                # Extracted numbers will be in the matches list
+                extracted_numbers = [int(match.replace(",", "")) for match in matches]
+
+                last_values.append(extracted_numbers[-1])
+            except:
+                price_difference = None
+                percentage_difference = None
+                break
+
+        price_difference = last_values[0] - last_values[-1]
+        percentage_difference = price_difference / last_values[-1] * 100
+    # print(price_change_array)
+    return price_difference, percentage_difference
