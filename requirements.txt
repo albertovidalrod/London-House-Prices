@@ -10,3 +10,4 @@ pyarrow
 pyyaml
 dask
 geocoder
+geopy
