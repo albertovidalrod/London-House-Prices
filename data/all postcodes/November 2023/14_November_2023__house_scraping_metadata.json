@@ -1,0 +1,36 @@
+{
+    "creation_date": "14/11/2023",
+    "search_area": "all postcodes",
+    "postcodes": [
+        "SE108JQ"
+    ],
+    "files_generated": [
+        "house_data_SE108JQ"
+    ],
+    "config_search": {
+        "search_radius": "3.0",
+        "min_price": "150000",
+        "max_price": "2000000",
+        "min_bedrooms": "1",
+        "max_bedrooms": "5",
+        "sorting": "Newest Listed",
+        "postcodes": {
+            "13": "IG118TN",
+            "14": "SE108JQ",
+            "15": "SW98JB",
+            "16": "SW192HR",
+            "17": "SE255AG",
+            "18": "BR12RR",
+            "19": "SE182DS",
+            "20": "W68AB",
+            "21": "TW74PU",
+            "22": "KT14DQ",
+            "23": "HA04AP",
+            "24": "NW32SP",
+            "25": "E96SR",
+            "26": "N213NG",
+            "27": "IG96LN",
+            "28": "RM113HS"
+        }
+    }
+}
