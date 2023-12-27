@@ -1,7 +1,7 @@
 name: Scrape data - All postcodes
 on:
-  schedule:
-      - cron: 0 9 13-28 * *
+  # schedule:
+  #     - cron: 0 9 13-28 * *
   workflow_dispatch:
 
 env: 
